@@ -19,6 +19,7 @@ public:
 
     void runMainThread();
     ServerEndpoint& getEndPoint();
+    void checkMail();
 
 private:
     ServerEndpoint endpoint;

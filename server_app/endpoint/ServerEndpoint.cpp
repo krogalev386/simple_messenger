@@ -46,7 +46,7 @@ int ServerEndpoint::acceptConnection()
 
 std::optional<int> ServerEndpoint::tryAcceptConnection()
 {
-    printf("waiting for incoming connection...\n");
+    /*printf("waiting for incoming connection...\n");
     LOG("waiting for incoming connection...\n");
 
     pollfd p_fd;
@@ -74,7 +74,17 @@ std::optional<int> ServerEndpoint::tryAcceptConnection()
         ready_to_accept = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) ? true : false;
         LOG("ready_to_accept = %d, p_fd.revents = %d", ready_to_accept, p_fd.revents);
     }
-    return acceptConnection();
+    return acceptConnection();*/
+
+    const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
+    if (ready_to_read)
+    {
+        return acceptConnection();
+    }
+    else
+    {
+        return std::nullopt;
+    }
 };
 
 int ServerEndpoint::getClientHandle(size_t index)

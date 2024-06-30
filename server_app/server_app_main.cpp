@@ -9,10 +9,6 @@
 int main(int argn, char* argv[])
 {
     ServerManager& serverManager = ServerManager::getInstance();
-    ServerEndpoint& server_point = serverManager.getEndPoint();
-
-    server_point.listenConnections(5);
-    server_point.tryAcceptConnection();
 
     serverManager.runMainThread();
     //int client_fd = server_point.getClientHandle(0);

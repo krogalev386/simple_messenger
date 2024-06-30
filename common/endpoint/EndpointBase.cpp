@@ -64,32 +64,45 @@ Envelope EndpointBase::receiveEnvelope(int sender_handle)
     return env;
 }
 
-std::optional<Envelope> EndpointBase::tryReceiveEnvelope(int sender_handle)
+std::tuple<bool, bool> EndpointBase::pollSocket(int socket_id)
 {
+    bool ready_to_hanlde = false;
+    bool err_or_closed   = false;
+
     pollfd p_fd;
-    p_fd.fd = sender_handle;
+    p_fd.fd = socket_id;
     p_fd.events = POLLIN;
-    int poll_res = poll(&p_fd, 1, 100000);
+    int poll_res = poll(&p_fd, 1, 100);
     LOG("Polling completed");
+
     if (poll_res == -1)
     {
         LOG("ERROR: socket pooling failed");
-        return std::nullopt;
+        perror("ERROR: socket pooling failed");
+        err_or_closed = true;
+        return {ready_to_hanlde, err_or_closed};
     }
 
-    bool err_or_closed = ((p_fd.revents & POLLHUP) | (p_fd.revents & POLLERR)) ? true : false;
+    err_or_closed = ((p_fd.revents & POLLHUP) | (p_fd.revents & POLLERR)) ? true : false;
     if (err_or_closed)
     {
         LOG("Connection closed");
-        return std::nullopt;
+        return {ready_to_hanlde, err_or_closed};
     }
 
-    bool ready_to_read = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) ? true : false;
-    
-    
+    ready_to_hanlde = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) ? true : false;
+    if (ready_to_hanlde)
+    {
+        LOG("ready_to_hanlde = %d, p_fd.revents = %d", ready_to_hanlde, p_fd.revents);
+    }
+    return {ready_to_hanlde, err_or_closed};
+}
+
+std::optional<Envelope> EndpointBase::tryReceiveEnvelope(int sender_handle)
+{
+    const auto [ready_to_read, err_or_closed] = pollSocket(sender_handle);
     if (ready_to_read)
     {
-        LOG("ready_to_read = %d, p_fd.revents = %d", ready_to_read, p_fd.revents);
         return receiveEnvelope(sender_handle);
     }
     else

@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <optional>
+#include <tuple>
 
 constexpr size_t buff_size = sizeof(Envelope);
 
@@ -36,6 +37,9 @@ public:
     void sendEnvelope(const Envelope& envelope);
     Envelope receiveEnvelope(int sender_handle);
     std::optional<Envelope> tryReceiveEnvelope(int sender_handle);
+
+protected:
+    std::tuple<bool, bool> pollSocket(int socket_id);
 
 protected:
     int socket_id;
