@@ -1,0 +1,4 @@
+add_subdirectory(endpoint)
+add_subdirectory(interfaces)
+add_subdirectory(logger)
+add_subdirectory(message_processor)
