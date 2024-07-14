@@ -6,13 +6,10 @@
 #include <cstring>
 #include <cstdio>
 
-void client_main()
-{
-    ClientEndpoint client_point(11111, SOCK_STREAM);
-    client_point.connectTo("127.0.0.1", 11111);
+constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
 
-    const char* greetings = "Hello,adfasdfadfaszxcvd dear serkver!";
-    
+Envelope create_text_envelope()
+{
     Envelope env = { 
         .meta_data = {
             .header = {
@@ -25,24 +22,71 @@ void client_main()
             .recipient_id = 2,
         }
     };
-    memset(&env.payload, 0, Envelope::size - sizeof(EnvelopeMeta));
+    return std::move(env);
+}
+
+void embed_text(Envelope& env, char* text_buffer)
+{
+    memcpy(&env.payload, text_buffer, buffer_size);
+}
+
+void write_message(char* text_buffer)
+{
+    memset(text_buffer, 0, buffer_size);
+    scanf("%s", text_buffer);
+}
+
+#if 0
+void client_main()
+{
+    ClientEndpoint client_point(11111, SOCK_STREAM);
+    client_point.connectTo("127.0.0.1", 11111);
+
+    const char* greetings = "Hello,adfasdfadfaszxcvd dear serkver!";
+    
+    Envelope env = create_text_envelope();
+
+    memset(&env.payload, 0, buffer_size);
     memcpy(&env.payload, greetings, strlen(greetings));
 
-    //std::vector<char> message(strlen(greetings)+1);
-    //printf("Original message lenght: %ld\n", message.capacity());
-    //std::memcpy(message.data(), greetings, message.capacity());
-
-    //client_point.sendData(message);
     usleep(1000000);
     client_point.sendEnvelope(env);
     usleep(1000000);
     client_point.sendEnvelope(env);
     usleep(1000000);
     client_point.sendEnvelope(env);
-
 };
+#endif
+
+void client_interactive_main(size_t port_id = 11111, const char* ip_string = "127.0.0.1")
+{
+    ClientEndpoint client_point(port_id, SOCK_STREAM);
+    client_point.connectTo(ip_string, port_id);
+
+    char buffer[buffer_size];
+    memset(buffer, 0, sizeof(buffer));
+
+    while (not (strcmp(buffer, "exit") == 0))
+    {
+        Envelope env = create_text_envelope();
+        write_message(buffer);
+        embed_text(env, buffer);
+        client_point.sendEnvelope(env);
+    }
+}
 
 int main(int argn, char* argv[])
 {
-    client_main();
+    if (argn == 1)
+    {
+        client_interactive_main();
+    }
+    else if (argn == 2)
+    {
+        client_interactive_main(11111, argv[1]);
+    }
+    else
+    {
+        printf("Too many args; the client has not started\n");
+    }
 }
