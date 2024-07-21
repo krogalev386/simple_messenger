@@ -17,7 +17,7 @@ public:
         return instance;
     }
 
-    void runMainThread();
+    void runEventLoop();
     ServerEndpoint& getEndPoint();
     void checkMail();
 

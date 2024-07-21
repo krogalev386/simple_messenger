@@ -7,9 +7,12 @@
 
 class ServerEndpoint : public EndpointBase
 {
+private:
+    constexpr static uint16_t maxTcpConnections = 8;
+
 public:
     ServerEndpoint(int port, int type, bool blocking);
-    void listenConnections(int queue_size);
+    void listenConnections();
     int acceptConnection();
     std::optional<int> tryAcceptConnection();
     int getClientHandle(size_t index);

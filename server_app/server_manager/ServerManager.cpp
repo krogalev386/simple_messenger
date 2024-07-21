@@ -34,15 +34,14 @@ void ServerManager::checkMail()
                 client_it--;
             }
         }
-        //printf("Num of connections: %ld\n", endpoint.numOfConnections());
     }
 };
 
-void ServerManager::runMainThread()
+void ServerManager::runEventLoop()
 {
     auto& endpoint = getEndPoint();
 
-    endpoint.listenConnections(5);
+    endpoint.listenConnections();
 
     while(true)
     {

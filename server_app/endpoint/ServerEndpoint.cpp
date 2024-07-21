@@ -21,9 +21,9 @@ ServerEndpoint::ServerEndpoint(int port, int type, bool blocking) : EndpointBase
     }
 };
 
-void ServerEndpoint::listenConnections(int queue_size)
+void ServerEndpoint::listenConnections()
 {
-    status = listen(socket_id, queue_size);
+    status = listen(socket_id, maxTcpConnections);
     if (status)
     {
         perror("Error: socket listening fails");
@@ -46,36 +46,6 @@ int ServerEndpoint::acceptConnection()
 
 std::optional<int> ServerEndpoint::tryAcceptConnection()
 {
-    /*printf("waiting for incoming connection...\n");
-    LOG("waiting for incoming connection...\n");
-
-    pollfd p_fd;
-    p_fd.fd = socket_id;
-    p_fd.events = POLLIN;
-
-    bool ready_to_accept = false;
-
-    while (not ready_to_accept)
-    {
-        int poll_res = poll(&p_fd, 1, 100000);
-        if (poll_res == -1)
-        {
-            LOG("ERROR: socket pooling failed");
-            return std::nullopt;
-        }
-
-        bool err_or_closed = ((p_fd.revents & POLLHUP) | (p_fd.revents & POLLERR)) ? true : false;
-        if (err_or_closed)
-        {
-            LOG("Connection closed");
-            return std::nullopt;
-        }
-
-        ready_to_accept = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) ? true : false;
-        LOG("ready_to_accept = %d, p_fd.revents = %d", ready_to_accept, p_fd.revents);
-    }
-    return acceptConnection();*/
-
     const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
     if (ready_to_read)
     {
