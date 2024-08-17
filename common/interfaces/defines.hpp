@@ -33,6 +33,13 @@ struct EnvelopeMeta
     UserID            recipient_id;
 };
 
+struct AbonentBaseRecord
+{
+    UserID user_id;
+    char   nickname[256];
+    char   password[256];
+};
+
 struct Envelope
 {
     static constexpr size_t size = 1024;
