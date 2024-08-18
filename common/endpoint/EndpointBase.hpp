@@ -34,17 +34,19 @@ public:
     void sendPackedMessage(const std::vector<char>& packed_message);
     void sendData(const std::vector<char>& message);
 #endif
-    void sendEnvelope(const Envelope& envelope);
+    void     sendEnvelope(const Envelope& envelope);
     Envelope receiveEnvelope(int sender_handle);
+
     std::optional<Envelope> tryReceiveEnvelope(int sender_handle);
 
 protected:
     std::tuple<bool, bool> pollSocket(int socket_id);
 
 protected:
-    int socket_id;
     sockaddr_in address;
-    int status;
+
+    int  socket_id;
+    int  status;
     bool valid_flag;
     char buffer[buff_size];
 };

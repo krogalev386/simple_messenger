@@ -20,9 +20,9 @@ ServerEndpoint& ServerManager::getEndPoint()
 
 void ServerManager::checkMail()
 {
-    for(auto client_it = endpoint.client_info_storage.begin();
-                client_it != endpoint.client_info_storage.end();
-                client_it++)
+    for(auto client_it  = endpoint.client_info_storage.begin();
+             client_it != endpoint.client_info_storage.end();
+             client_it++)
     {
         int client_fd = client_it->handle;
         std::optional<Envelope> result = endpoint.tryReceiveEnvelope(client_fd);

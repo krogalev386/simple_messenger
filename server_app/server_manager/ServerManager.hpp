@@ -19,8 +19,9 @@ public:
         return instance;
     }
 
-    void runEventLoop();
     ServerEndpoint& getEndPoint();
+
+    void runEventLoop();
     void checkMail();
 
 private:

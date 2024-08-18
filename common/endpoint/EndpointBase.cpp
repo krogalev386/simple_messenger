@@ -27,7 +27,7 @@ EndpointBase::EndpointBase(int port, int type, int protocol, bool blocking)
         valid_flag = false;
     }
     address.sin_family = AF_INET;
-    address.sin_port = htons(port);
+    address.sin_port   = htons(port);
 }
 
 EndpointBase::~EndpointBase()

@@ -12,10 +12,12 @@ private:
 
 public:
     ServerEndpoint(int port, int type, bool blocking);
-    void listenConnections();
-    int acceptConnection();
+
     std::optional<int> tryAcceptConnection();
-    int getClientHandle(size_t index);
+
+    void   listenConnections();
+    int    acceptConnection();
+    int    getClientHandle(size_t index);
     size_t numOfConnections();
 
 public:

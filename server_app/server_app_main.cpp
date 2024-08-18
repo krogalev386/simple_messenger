@@ -8,7 +8,5 @@
 
 int main(int argn, char* argv[])
 {
-    ServerManager& serverManager = ServerManager::getInstance();
-
-    serverManager.runEventLoop();
+    ServerManager::getInstance().runEventLoop();
 }
