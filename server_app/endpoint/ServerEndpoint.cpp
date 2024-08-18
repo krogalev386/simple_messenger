@@ -54,19 +54,23 @@ int ServerEndpoint::acceptConnection()
         bool is_registered = AuthentificationService::getInstance().checkIfRegistered(credentials);
         if (not is_registered)
         {
-            LOG("Error: authentification failed, no registered users found, connection closed");
-            perror("Error: authentification failed, no registered users found, connection closed");
+            const char* error_msg = "Error: authentification failed, no registered users found, connection closed";
+            LOG(error_msg);
+            perror(error_msg);
             close(client_socket_id);
             return -1;
         }
     }
     else if (msgType == MessageType::UserMessage)
     {
-        LOG("Error: authentification failed, message of wrong type has been received, connection closed");
-        perror("Error: authentification failed, message of wrong type has been received, connection closed");
+        const char* error_msg = "Error: authentification failed, message of wrong type has been received, connection closed";
+        LOG(error_msg);
+        perror(error_msg);
         close(client_socket_id);
         return -1;
     }
+
+    // Acception
     new_client.handle = client_socket_id;
     client_info_storage.push_back(new_client);
     return client_socket_id;
