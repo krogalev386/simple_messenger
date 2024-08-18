@@ -2,6 +2,8 @@
 
 #include "ServerEndpoint.hpp"
 
+#include "AuthentificationService.hpp"
+
 class ServerManager
 {
 private:

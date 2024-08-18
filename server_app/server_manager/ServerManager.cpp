@@ -1,5 +1,6 @@
 #include "ServerManager.hpp"
 
+#include "AuthentificationService.hpp"
 #include "Logger.hpp"
 #include "ServerEndpoint.hpp"
 
@@ -8,7 +9,9 @@
 #include <string.h>
 
 ServerManager::ServerManager() : endpoint(11111, SOCK_STREAM, false)
-{};
+{
+    AuthentificationService::getInstance().init();
+};
 
 ServerEndpoint& ServerManager::getEndPoint()
 {
@@ -27,8 +30,13 @@ void ServerManager::checkMail()
         {
             LOG("Client %d, Received message: %s", client_fd, result->payload);
             printf("Received message: %s\n", result->payload);
-            if ((result->meta_data.header.message_type == MessageType::ServiceMessage)
-            and strcmp(result->payload, "ConnectionClosed") == 0)
+            MessageType msgType = result->meta_data.header.message_type;
+            if (msgType == MessageType::UserMessage)
+            {
+                LOG("User message received");
+            }
+            if ((msgType == MessageType::ServiceMessage)
+                 and strcmp(result->payload, "ConnectionClosed") == 0)
             {
                 endpoint.client_info_storage.erase(client_it);
                 client_it--;

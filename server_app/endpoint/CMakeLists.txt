@@ -5,6 +5,7 @@ target_include_directories(server_endpoints_lib
 )
 target_link_libraries(server_endpoints_lib
     PUBLIC
+        auth_service_lib
         logger_lib_if
         common_endpoints_lib
 )

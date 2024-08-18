@@ -10,7 +10,7 @@ constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
 
 Envelope create_text_envelope()
 {
-    Envelope env = { 
+    Envelope env = {
         .meta_data = {
             .header = {
                 .payload_size = 234,
@@ -22,6 +22,13 @@ Envelope create_text_envelope()
             .recipient_id = 2,
         }
     };
+    return std::move(env);
+}
+
+Envelope create_auth_envelope()
+{
+    Envelope env = create_text_envelope();
+    env.meta_data.header.message_type = MessageType::ServiceMessage;
     return std::move(env);
 }
 
@@ -60,9 +67,27 @@ void client_main()
 
 void client_interactive_main(size_t port_id = 11111, const char* ip_string = "127.0.0.1")
 {
+    // Connection:
     ClientEndpoint client_point(port_id, SOCK_STREAM);
     client_point.connectTo(ip_string, port_id);
 
+
+    // Authentification:
+    UserCredentials credentials;
+
+    printf("Enter your credentials\n");
+    printf("Enter your username:\n");
+    scanf("%s", credentials.nickname);
+    printf("Enter your password:\n");
+    scanf("%s", credentials.password);
+
+    Envelope auth_message = create_auth_envelope();
+    memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
+
+    client_point.sendEnvelope(auth_message);
+
+
+    // Job loop
     char buffer[buffer_size];
     memset(buffer, 0, sizeof(buffer));
 

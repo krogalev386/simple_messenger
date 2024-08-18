@@ -1,3 +1,4 @@
+add_subdirectory(authentification_service)
 add_subdirectory(endpoint)
 add_subdirectory(server_manager)
 

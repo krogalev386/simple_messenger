@@ -1,9 +1,11 @@
 #include "ServerEndpoint.hpp"
 
+#include "AuthentificationService.hpp"
 #include "Logger.hpp"
 
 #include <arpa/inet.h>
 #include <cstdio>
+#include <cstring>
 #include <optional>
 #include <poll.h>
 #include <netinet/in.h>
@@ -38,6 +40,32 @@ int ServerEndpoint::acceptConnection()
     if (client_socket_id < 0)
     {
         perror("Error: acception failed");
+    }
+
+    // Authentification:
+    Envelope    credentials_envlp = receiveEnvelope(client_socket_id);
+    MessageType msgType           = credentials_envlp.meta_data.header.message_type;
+
+    if (msgType == MessageType::ServiceMessage)
+    {
+        UserCredentials credentials;
+        memcpy(&credentials, &(credentials_envlp.payload), sizeof(UserCredentials));
+        LOG("Connection attempt from user %s, %s", credentials.nickname, credentials.password);
+        bool is_registered = AuthentificationService::getInstance().checkIfRegistered(credentials);
+        if (not is_registered)
+        {
+            LOG("Error: authentification failed, no registered users found, connection closed");
+            perror("Error: authentification failed, no registered users found, connection closed");
+            close(client_socket_id);
+            return -1;
+        }
+    }
+    else if (msgType == MessageType::UserMessage)
+    {
+        LOG("Error: authentification failed, message of wrong type has been received, connection closed");
+        perror("Error: authentification failed, message of wrong type has been received, connection closed");
+        close(client_socket_id);
+        return -1;
     }
     new_client.handle = client_socket_id;
     client_info_storage.push_back(new_client);

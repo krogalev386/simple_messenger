@@ -33,9 +33,14 @@ struct EnvelopeMeta
     UserID            recipient_id;
 };
 
-struct AbonentBaseRecord
+struct PhoneBookRecord
 {
     UserID user_id;
+    char   nickname[256];
+};
+
+struct UserCredentials
+{
     char   nickname[256];
     char   password[256];
 };
