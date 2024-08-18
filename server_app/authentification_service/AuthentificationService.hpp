@@ -1,25 +1,20 @@
 #pragma once
 
+#include "CrtpSingleton.hpp"
 #include "defines.hpp"
+
 #include <vector>
 #include <utility>
 
-class AuthentificationService
+class AuthentificationService : public CrtpSingleton<AuthentificationService>
 {
-private:
+friend class CrtpSingleton<AuthentificationService>;
+
+protected:
     AuthentificationService()  = default;
     ~AuthentificationService() = default;
-
-    AuthentificationService(const AuthentificationService&) = delete;
-    AuthentificationService(AuthentificationService&&)      = delete;
-
+    
 public:
-    static AuthentificationService& getInstance()
-    {
-        static AuthentificationService instance;
-        return instance;
-    }
-
     void init();
     bool checkIfRegistered(const UserCredentials&);
 

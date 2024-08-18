@@ -7,4 +7,5 @@ target_link_libraries(auth_service_lib
     PUBLIC
         msg_itf_lib_if
         logger_lib_if
+        utilities_lib_if
 )

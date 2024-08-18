@@ -1,14 +1,17 @@
 #pragma once
 
+#include "CrtpSingleton.hpp"
+
 #include <cstdio>
 #include <memory>
 #include <sys/time.h>
 
 #define LOG(x ...) Logger::getInstance().log(__func__, x);
 
-class Logger
+class Logger : public CrtpSingleton<Logger>
 {
-private:
+friend class CrtpSingleton<Logger>;
+protected:
     Logger()
     {
         log_file_handle = std::fopen("runtime.log", "w");
@@ -22,11 +25,6 @@ private:
     Logger(Logger&&)      = delete;
 
 public:
-    static Logger& getInstance()
-    {
-        static Logger logger;
-        return logger;
-    };
 
     template<class ... Args>
     void log(const char* func_name, Args ... args)

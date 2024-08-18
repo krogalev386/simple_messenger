@@ -1,24 +1,17 @@
 #pragma once
 
+#include "CrtpSingleton.hpp"
 #include "ServerEndpoint.hpp"
 
-#include "AuthentificationService.hpp"
-
-class ServerManager
+class ServerManager : public CrtpSingleton<ServerManager>
 {
-private:
+friend class CrtpSingleton<ServerManager>;
+
+protected:
     ServerManager();
-    ~ServerManager()                    = default;
-    ServerManager(const ServerManager&) = delete;
-    ServerManager(ServerManager&&)      = delete;
+    ~ServerManager() = default;
 
 public:
-    static ServerManager& getInstance()
-    {
-        static ServerManager instance;
-        return instance;
-    }
-
     ServerEndpoint& getEndPoint();
 
     void runEventLoop();
