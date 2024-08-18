@@ -1,0 +1,8 @@
+# build docker image
+docker build -t build_messenger .
+
+# delete image
+docker image rm build_messenger
+
+# run container
+docker run --rm -it --name server (or client) --security-opt seccomp=unconfined build_messenger
