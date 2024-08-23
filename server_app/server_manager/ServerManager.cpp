@@ -2,6 +2,7 @@
 
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
+#include "ThreadManager.hpp"
 #include "ServerEndpoint.hpp"
 
 #include <optional>
@@ -11,6 +12,7 @@
 ServerManager::ServerManager() : endpoint(11111, SOCK_STREAM, false)
 {
     AuthentificationService::getInstance().init();
+    ThreadManager::getInstance().init();
 };
 
 ServerEndpoint& ServerManager::getEndPoint()
@@ -38,6 +40,7 @@ void ServerManager::checkMail()
             if ((msgType == MessageType::ServiceMessage)
                  and strcmp(result->payload, "ConnectionClosed") == 0)
             {
+                close(client_fd);
                 endpoint.client_info_storage.erase(client_it);
                 client_it--;
             }
@@ -53,7 +56,11 @@ void ServerManager::runEventLoop()
 
     while(true)
     {
-        endpoint.tryAcceptConnection();
-        checkMail();
+        ThreadManager::getInstance().schedule_task([&endpoint]{
+            endpoint.tryAcceptConnection();
+        });
+        ThreadManager::getInstance().schedule_task([this]{
+            checkMail();
+        });
     }
 };

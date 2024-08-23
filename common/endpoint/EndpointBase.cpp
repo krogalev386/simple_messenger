@@ -45,22 +45,16 @@ EndpointBase::~EndpointBase()
 
 void EndpointBase::sendEnvelope(const Envelope& envelope)
 {
-    size_t n_bytes = send(socket_id, &envelope, sizeof(Envelope), 0);
-    LOG("%lu bytes has been sent", n_bytes);
+    int64_t n_bytes = send(socket_id, &envelope, sizeof(Envelope), 0);
+    LOG("%ld bytes has been sent", n_bytes);
 }
 
 Envelope EndpointBase::receiveEnvelope(int sender_handle)
 {
     Envelope env;
     memset(&env, 0, sizeof(Envelope));
-    size_t n_bytes = recv(sender_handle, &env, sizeof(Envelope), 0);
-    LOG("%lu bytes has been received", n_bytes);
-    if (n_bytes == 0)
-    {
-        env.meta_data.header.message_type = MessageType::ServiceMessage;
-        const char message[] = "ConnectionClosed";
-        memcpy(env.payload, message, sizeof(message));
-    }
+    int64_t n_bytes = recv(sender_handle, &env, sizeof(Envelope), 0);
+    LOG("%ld bytes has been received", n_bytes);
     return env;
 }
 

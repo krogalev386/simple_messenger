@@ -98,6 +98,11 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
         embed_text(env, buffer);
         client_point.sendEnvelope(env);
     }
+
+    Envelope env = create_text_envelope();
+    embed_text(env, "ConnectionClosed");
+    env.meta_data.header.message_type = MessageType::ServiceMessage;
+    client_point.sendEnvelope(env);
 }
 
 int main(int argn, char* argv[])

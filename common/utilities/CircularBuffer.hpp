@@ -22,7 +22,15 @@ public:
     CircularBuffer(CircularBuffer&&)                = delete;
     CircularBuffer& operator=(const CircularBuffer) = delete;
 
+    bool is_empty()
+    {
+        return size == 0;
+    };
 
+    bool is_full()
+    {
+        return size == length;
+    };
 
     T& operator[](int offset)
     {
@@ -37,7 +45,7 @@ public:
 
     bool push(const T& item)
     {
-        if (size < length)
+        if (not is_full())
         {
             circ_buffer[end_pos] = item;
             end_pos++;
@@ -46,6 +54,7 @@ public:
                 end_pos = 0;
             }
             size++;
+            LOG("New size: %u", size);
             return true;
         }
         else
@@ -57,7 +66,7 @@ public:
 
     std::optional<T> pop()
     {
-        if (size == 0)
+        if (is_empty())
         {
             LOG("Empty buffer!");
             return std::nullopt;
@@ -65,6 +74,10 @@ public:
         T item = circ_buffer[begin_pos];
         size--;
         begin_pos++;
+        if (begin_pos == length)
+        {
+            begin_pos = 0;
+        }
         return std::move(item);
     }
 };
