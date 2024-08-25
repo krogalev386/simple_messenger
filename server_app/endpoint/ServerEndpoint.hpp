@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <optional>
+#include <mutex>
 
 class ServerEndpoint : public EndpointBase
 {
@@ -17,9 +18,11 @@ public:
 
     void   listenConnections();
     int    acceptConnection();
+    int    authentificateUser(int client_socket_id);
     int    getClientHandle(size_t index);
     size_t numOfConnections();
 
 public:
     std::vector<ClientInfo> client_info_storage;
+    std::mutex              cis_mutex;
 };

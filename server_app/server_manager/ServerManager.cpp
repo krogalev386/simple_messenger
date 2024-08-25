@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <cstdio>
+#include <mutex>
 #include <string.h>
 
 ServerManager::ServerManager() : endpoint(11111, SOCK_STREAM, false)
@@ -22,6 +23,9 @@ ServerEndpoint& ServerManager::getEndPoint()
 
 void ServerManager::checkMail()
 {
+    // Protect client_info_storage integrity
+    std::unique_lock<std::mutex> lock(endpoint.cis_mutex);
+
     for(auto client_it  = endpoint.client_info_storage.begin();
              client_it != endpoint.client_info_storage.end();
              client_it++)
@@ -56,11 +60,7 @@ void ServerManager::runEventLoop()
 
     while(true)
     {
-        ThreadManager::getInstance().schedule_task([&endpoint]{
-            endpoint.tryAcceptConnection();
-        });
-        ThreadManager::getInstance().schedule_task([this]{
-            checkMail();
-        });
+        endpoint.tryAcceptConnection();
+        checkMail();
     }
 };

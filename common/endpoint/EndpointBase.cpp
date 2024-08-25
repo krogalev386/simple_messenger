@@ -67,7 +67,6 @@ std::tuple<bool, bool> EndpointBase::pollSocket(int socket_id)
     p_fd.fd = socket_id;
     p_fd.events = POLLIN;
     int poll_res = poll(&p_fd, 1, 100);
-    LOG("Polling completed");
 
     if (poll_res == -1)
     {

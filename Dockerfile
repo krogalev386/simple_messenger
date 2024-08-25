@@ -3,7 +3,7 @@ RUN apk update && \
     apk add --no-cache g++ make cmake
 WORKDIR /test_bench
 COPY . .
-RUN rm -rf build/ && mkdir build && cmake -B build . && cmake --build build
+RUN rm -rf build/ && mkdir build && cmake -B build . && cmake --build build -j 4
 
 FROM alpine:latest
 RUN apk update && \
