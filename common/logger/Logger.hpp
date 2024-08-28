@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <mutex>
 #include <sys/time.h>
 
 #define LOG(x ...) Logger::getInstance().log(__func__, x);
@@ -29,6 +30,7 @@ public:
     template<class ... Args>
     void log(const char* func_name, Args ... args)
     {
+        std::unique_lock<std::mutex> lock(log_mtx);
         char datestamp_str[std::size("yyyy-mm-ddThh:mm:ssZ")];
         
         timeval curTime;
@@ -45,5 +47,6 @@ public:
     }
 
 private:
+    std::mutex log_mtx;
     std::FILE* log_file_handle;
 };
