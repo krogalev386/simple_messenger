@@ -34,12 +34,32 @@ void ServerEndpoint::listenConnections()
     }
 };
 
+void ServerEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socket_id)
+{
+    Envelope refuse_notification;
+    refuse_notification.meta_data.header.message_type = MessageType::ServiceMessage;
+    char refuse_text[] = "REJECTED";
+    char accept_text[] = "ACCEPTED";
+    if (is_accepted)
+    {
+        memcpy(&refuse_notification.payload, &accept_text, sizeof(accept_text));
+    }
+    else
+    {
+        memcpy(&refuse_notification.payload, &refuse_text, sizeof(refuse_text));
+    }
+    sendEnvelope(refuse_notification, client_socket_id);
+};
+
 int ServerEndpoint::acceptConnection()
 {
     ClientInfo new_client;
     int client_socket_id;
 
-    client_socket_id = accept(socket_id, &new_client.addr, &new_client.addrlen);
+    client_socket_id = accept(socket_id,
+                              &new_client.socket_info.addr,
+                              &new_client.socket_info.addrlen);
+
     LOG("client socket id: %d", client_socket_id);
     if (client_socket_id < 0)
     {
@@ -51,9 +71,12 @@ int ServerEndpoint::acceptConnection()
         // Authentification:
         if (authentificateUser(client_socket_id) == -1)
         {
+            sendAcceptNotificaton(false, client_socket_id);
             close(client_socket_id);
             return;
         }
+
+        sendAcceptNotificaton(true, client_socket_id);
 
         // Log in
         new_client.handle = client_socket_id;

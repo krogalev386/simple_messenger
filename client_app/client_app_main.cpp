@@ -86,6 +86,20 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
 
     client_point.sendEnvelope(auth_message);
 
+    Envelope acknowledge_env = client_point.receiveEnvelope();
+    if (acknowledge_env.meta_data.header.message_type != MessageType::ServiceMessage)
+    {
+        printf("Connection refused, wrong message type, please try again\n");
+        return;
+    }
+
+    bool is_accepted = (strcmp(acknowledge_env.payload, "ACCEPTED") == 0);
+
+    if (not is_accepted)
+    {
+        printf("Connection refused, please try again\n");
+        return;
+    }
 
     // Job loop
     char buffer[buffer_size];

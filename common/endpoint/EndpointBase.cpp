@@ -43,14 +43,16 @@ EndpointBase::~EndpointBase()
     }
 }
 
-void EndpointBase::sendEnvelope(const Envelope& envelope)
+void EndpointBase::sendEnvelope(const Envelope& envelope, int receiver_handle)
 {
-    int64_t n_bytes = send(socket_id, &envelope, sizeof(Envelope), 0);
+    receiver_handle = (receiver_handle == 0) ? socket_id : receiver_handle;
+    int64_t n_bytes = send(receiver_handle, &envelope, sizeof(Envelope), 0);
     LOG("%ld bytes has been sent", n_bytes);
 }
 
 Envelope EndpointBase::receiveEnvelope(int sender_handle)
 {
+    sender_handle = (sender_handle == 0) ? socket_id : sender_handle;
     Envelope env;
     memset(&env, 0, sizeof(Envelope));
     int64_t n_bytes = recv(sender_handle, &env, sizeof(Envelope), 0);
