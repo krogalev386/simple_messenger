@@ -3,6 +3,7 @@
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
 #include "ThreadManager.hpp"
+#include "SocketPolling.hpp"
 
 #include <arpa/inet.h>
 #include <cstdio>
@@ -123,7 +124,7 @@ int ServerEndpoint::authentificateUser(int client_socket_id)
 
 std::optional<int> ServerEndpoint::tryAcceptConnection()
 {
-    const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
+    const auto [ready_to_read, err_or_closed] = utilities::pollSocket(socket_id);
     if (ready_to_read)
     {
         return acceptConnection();

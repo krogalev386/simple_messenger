@@ -18,7 +18,6 @@ protected:
     ~ThreadManager();
 
 public:
-    void init() {};
     void schedule_task(std::function<void()> task);
 
 private:

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-void AuthentificationService::init()
+AuthentificationService::AuthentificationService()
 {
     auto user_1 = std::make_pair<uint64_t, UserCredentials>(1, UserCredentials{"client_a", "client_a"});
     auto user_2 = std::make_pair<uint64_t, UserCredentials>(2, UserCredentials{"client_b", "client_b"});

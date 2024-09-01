@@ -12,8 +12,8 @@
 
 ServerManager::ServerManager() : endpoint(11111, SOCK_STREAM, false)
 {
-    AuthentificationService::getInstance().init();
-    ThreadManager::getInstance().init();
+    AuthentificationService::init();
+    ThreadManager::init();
 };
 
 ServerEndpoint& ServerManager::getEndPoint()

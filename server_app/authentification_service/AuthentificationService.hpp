@@ -11,11 +11,10 @@ class AuthentificationService : public CrtpSingleton<AuthentificationService>
 friend class CrtpSingleton<AuthentificationService>;
 
 protected:
-    AuthentificationService()  = default;
+    AuthentificationService();
     ~AuthentificationService() = default;
     
 public:
-    void init();
     bool checkIfRegistered(const UserCredentials&);
 
 private:

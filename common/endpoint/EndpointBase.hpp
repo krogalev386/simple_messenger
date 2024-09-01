@@ -8,21 +8,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <optional>
-#include <tuple>
 
 constexpr size_t buff_size = sizeof(Envelope);
-
-struct SocketInfo
-{
-    sockaddr addr;
-    socklen_t addrlen;
-};
-
-struct ClientInfo
-{
-    int handle;
-    SocketInfo socket_info;
-};
 
 class EndpointBase
 {
@@ -46,7 +33,6 @@ public:
     sockaddr_in getAddress() { return address;}
 
 protected:
-    std::tuple<bool, bool> pollSocket(int socket_id);
 
 protected:
     sockaddr_in address;

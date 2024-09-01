@@ -2,9 +2,9 @@
 
 #include "CrtpSingleton.hpp"
 
-#include <cstdio>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <sys/time.h>
 
 #define LOG(x ...) Logger::getInstance().log(__func__, x);

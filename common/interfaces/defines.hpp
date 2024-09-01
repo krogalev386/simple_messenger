@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <vector>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 
 typedef uint64_t UserID;
 
@@ -43,6 +46,18 @@ struct UserCredentials
 {
     char   nickname[256];
     char   password[256];
+};
+
+struct SocketInfo
+{
+    sockaddr addr;
+    socklen_t addrlen;
+};
+
+struct ClientInfo
+{
+    int handle;
+    SocketInfo socket_info;
 };
 
 struct Envelope

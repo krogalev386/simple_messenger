@@ -8,5 +8,6 @@ target_link_libraries(server_endpoints_lib
         auth_service_lib
         logger_lib_if
         common_endpoints_lib
+        comm_utils_lib
         thread_manager_lib
 )

@@ -11,6 +11,7 @@ private:
     CrtpSingleton(const CrtpSingleton&) = delete;
     CrtpSingleton(CrtpSingleton&&)      = delete;
 public:
+    static void init() { getInstance(); };
     static T& getInstance()
     {
         static T instance;

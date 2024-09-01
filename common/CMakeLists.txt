@@ -1,3 +1,4 @@
+add_subdirectory(comm_utils)
 add_subdirectory(endpoint)
 add_subdirectory(interfaces)
 add_subdirectory(logger)
