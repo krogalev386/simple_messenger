@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CrtpSingleton.hpp"
-#include "ServerEndpoint.hpp"
+#include "ServerTcpEndpoint.hpp"
+#include "ServerUdpEndpoint.hpp"
 
 class ServerManager : public CrtpSingleton<ServerManager>
 {
@@ -12,11 +13,13 @@ protected:
     ~ServerManager() = default;
 
 public:
-    ServerEndpoint& getEndPoint();
+    ServerTcpEndpoint& getTcpEndPoint();
+    ServerUdpEndpoint& getUdpEndPoint();
 
     void runEventLoop();
     void checkMail();
 
 private:
-    ServerEndpoint endpoint;
+    ServerTcpEndpoint endpoint;
+    ServerUdpEndpoint udpEndpoint;
 };

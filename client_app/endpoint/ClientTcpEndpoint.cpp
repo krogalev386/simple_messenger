@@ -1,11 +1,11 @@
-#include "ClientEndpoint.hpp"
+#include "ClientTcpEndpoint.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <cstdio>
 
-void ClientEndpoint::connectTo(const char* ip_address, int server_port)
+void ClientTcpEndpoint::connectTo(const char* ip_address, int server_port)
 {
     sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;

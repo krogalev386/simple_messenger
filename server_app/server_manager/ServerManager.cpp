@@ -3,26 +3,32 @@
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
 #include "ThreadManager.hpp"
-#include "ServerEndpoint.hpp"
+#include "ServerTcpEndpoint.hpp"
 
 #include <optional>
 #include <cstdio>
 #include <mutex>
 #include <string.h>
 
-ServerManager::ServerManager() : endpoint(11111, SOCK_STREAM, false)
+ServerManager::ServerManager() : endpoint(11111, false), udpEndpoint(11112, false)
 {
     AuthentificationService::init();
     ThreadManager::init();
 };
 
-ServerEndpoint& ServerManager::getEndPoint()
+ServerTcpEndpoint& ServerManager::getTcpEndPoint()
 {
     return endpoint;
 };
 
+ServerUdpEndpoint& ServerManager::getUdpEndPoint()
+{
+    return udpEndpoint;
+};
+
 void ServerManager::checkMail()
 {
+#if TCP_MODE_ON
     // Protect client_info_storage integrity
     std::unique_lock<std::mutex> lock(endpoint.cis_mutex);
 
@@ -50,11 +56,27 @@ void ServerManager::checkMail()
             }
         }
     }
+#else
+    auto& udpEndpoint = getUdpEndPoint();
+
+    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope();
+    if (result)
+    {
+        LOG("Received message over UDP: %s", result->payload);
+        printf("Received message over UDP: %s\n", result->payload);
+        MessageType msgType = result->meta_data.header.message_type;
+        if (msgType == MessageType::UserMessage)
+        {
+            LOG("User message received");
+        }
+    }
+
+#endif
 };
 
 void ServerManager::runEventLoop()
 {
-    auto& endpoint = getEndPoint();
+    auto& endpoint = getTcpEndPoint();
 
     endpoint.listenConnections();
 

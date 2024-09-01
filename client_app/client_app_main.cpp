@@ -1,4 +1,5 @@
-#include "ClientEndpoint.hpp"
+#include "ClientTcpEndpoint.hpp"
+#include "ClientUdpEndpoint.hpp"
 
 #include "defines.hpp"
 
@@ -46,8 +47,8 @@ void write_message(char* text_buffer)
 #if 0
 void client_main()
 {
-    ClientEndpoint client_point(11111, SOCK_STREAM);
-    client_point.connectTo("127.0.0.1", 11111);
+    ClientTcpEndpoint client_tcp_point(11111);
+    client_tcp_point.connectTo("127.0.0.1", 11111);
 
     const char* greetings = "Hello,adfasdfadfaszxcvd dear serkver!";
     
@@ -57,19 +58,27 @@ void client_main()
     memcpy(&env.payload, greetings, strlen(greetings));
 
     usleep(1000000);
-    client_point.sendEnvelope(env);
+    client_tcp_point.sendEnvelope(env);
     usleep(1000000);
-    client_point.sendEnvelope(env);
+    client_tcp_point.sendEnvelope(env);
     usleep(1000000);
-    client_point.sendEnvelope(env);
+    client_tcp_point.sendEnvelope(env);
 };
 #endif
 
 void client_interactive_main(size_t port_id = 11111, const char* ip_string = "127.0.0.1")
 {
     // Connection:
-    ClientEndpoint client_point(port_id, SOCK_STREAM);
-    client_point.connectTo(ip_string, port_id);
+    ClientTcpEndpoint client_tcp_point(port_id);
+    ClientUdpEndpoint client_udp_point(11112);
+
+    sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port   = htons(11112);
+    inet_pton(AF_INET, ip_string, &server_addr.sin_addr);
+
+    SocketInfo serv_addr {*reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)};
+    client_tcp_point.connectTo(ip_string, port_id);
 
 
     // Authentification:
@@ -84,9 +93,9 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
     Envelope auth_message = create_auth_envelope();
     memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
 
-    client_point.sendEnvelope(auth_message);
+    client_tcp_point.sendEnvelope(auth_message);
 
-    Envelope acknowledge_env = client_point.receiveEnvelope();
+    Envelope acknowledge_env = client_tcp_point.receiveEnvelope();
     if (acknowledge_env.meta_data.header.message_type != MessageType::ServiceMessage)
     {
         printf("Connection refused, wrong message type, please try again\n");
@@ -110,13 +119,19 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
         Envelope env = create_text_envelope();
         write_message(buffer);
         embed_text(env, buffer);
-        client_point.sendEnvelope(env);
+#if TCP_MODE_ON
+        client_tcp_point.sendEnvelope(env);
+#else
+        client_udp_point.sendEnvelope(env, serv_addr);
+#endif
     }
 
+#if TCP_MODE_ON
     Envelope env = create_text_envelope();
     embed_text(env, "ConnectionClosed");
     env.meta_data.header.message_type = MessageType::ServiceMessage;
-    client_point.sendEnvelope(env);
+    client_tcp_point.sendEnvelope(env);
+#endif
 }
 
 int main(int argn, char* argv[])

@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <optional>
+#include <tuple>
 
 constexpr size_t buff_size = sizeof(Envelope);
 
@@ -19,18 +20,9 @@ public:
 
     bool is_valid() {return valid_flag;}
 
-// This code will be used later
-#if 0
-    std::vector<char> receiveData(int sender_handle);
+    sockaddr_in getAddress() { return address; }
 
-    void sendPackedMessage(const std::vector<char>& packed_message);
-    void sendData(const std::vector<char>& message);
-#endif
-    void     sendEnvelope(const Envelope& envelope, int receiver_handle = 0);
-    Envelope receiveEnvelope(int sender_handle = 0);
-
-    std::optional<Envelope> tryReceiveEnvelope(int sender_handle);
-    sockaddr_in getAddress() { return address;}
+    std::tuple<bool, bool> pollSocket(int socket_id);
 
 protected:
 

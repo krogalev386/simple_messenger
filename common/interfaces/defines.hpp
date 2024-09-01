@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 
 
+#define TCP_MODE_ON 0
+
 typedef uint64_t UserID;
 
 enum DataType : uint8_t

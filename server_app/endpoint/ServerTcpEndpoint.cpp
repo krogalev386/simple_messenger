@@ -1,9 +1,8 @@
-#include "ServerEndpoint.hpp"
+#include "ServerTcpEndpoint.hpp"
 
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
 #include "ThreadManager.hpp"
-#include "SocketPolling.hpp"
 
 #include <arpa/inet.h>
 #include <cstdio>
@@ -15,7 +14,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-ServerEndpoint::ServerEndpoint(int port, int type, bool blocking) : EndpointBase(port, type, 0, blocking)
+ServerTcpEndpoint::ServerTcpEndpoint(int port, bool blocking) : TcpEndpointBase(port, 0, blocking)
 {
     client_info_storage = std::vector<ClientInfo>();
     address.sin_addr.s_addr = INADDR_ANY;
@@ -26,7 +25,7 @@ ServerEndpoint::ServerEndpoint(int port, int type, bool blocking) : EndpointBase
     }
 };
 
-void ServerEndpoint::listenConnections()
+void ServerTcpEndpoint::listenConnections()
 {
     status = listen(socket_id, maxTcpConnections);
     if (status)
@@ -35,7 +34,7 @@ void ServerEndpoint::listenConnections()
     }
 };
 
-void ServerEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socket_id)
+void ServerTcpEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socket_id)
 {
     Envelope refuse_notification;
     refuse_notification.meta_data.header.message_type = MessageType::ServiceMessage;
@@ -52,7 +51,7 @@ void ServerEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socket_i
     sendEnvelope(refuse_notification, client_socket_id);
 };
 
-int ServerEndpoint::acceptConnection()
+int ServerTcpEndpoint::acceptConnection()
 {
     ClientInfo new_client;
     int client_socket_id;
@@ -87,11 +86,16 @@ int ServerEndpoint::acceptConnection()
             client_info_storage.push_back(new_client);
             printf("Client fd %d is successfully registered\n", client_socket_id);
         }
+#if TCP_MODE_ON
+#else
+        close(client_socket_id);
+        printf("Connection with client_id %d closed.", client_socket_id);
+#endif
     });
     return client_socket_id;
 };
 
-int ServerEndpoint::authentificateUser(int client_socket_id)
+int ServerTcpEndpoint::authentificateUser(int client_socket_id)
 {
     // Authentification:
     LOG("current client_socket_id: %d", client_socket_id);
@@ -122,9 +126,9 @@ int ServerEndpoint::authentificateUser(int client_socket_id)
     return client_socket_id;
 };
 
-std::optional<int> ServerEndpoint::tryAcceptConnection()
+std::optional<int> ServerTcpEndpoint::tryAcceptConnection()
 {
-    const auto [ready_to_read, err_or_closed] = utilities::pollSocket(socket_id);
+    const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
     if (ready_to_read)
     {
         return acceptConnection();
@@ -135,12 +139,12 @@ std::optional<int> ServerEndpoint::tryAcceptConnection()
     }
 };
 
-int ServerEndpoint::getClientHandle(size_t index)
+int ServerTcpEndpoint::getClientHandle(size_t index)
 {
     return client_info_storage[index].handle;
 };
 
-size_t ServerEndpoint::numOfConnections()
+size_t ServerTcpEndpoint::numOfConnections()
 {
     return client_info_storage.size();
 };

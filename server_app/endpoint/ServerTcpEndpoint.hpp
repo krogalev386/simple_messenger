@@ -1,18 +1,18 @@
 #pragma once
 
-#include "EndpointBase.hpp"
+#include "TcpEndpointBase.hpp"
 
 #include <vector>
 #include <optional>
 #include <mutex>
 
-class ServerEndpoint : public EndpointBase
+class ServerTcpEndpoint : public TcpEndpointBase
 {
 private:
     constexpr static uint16_t maxTcpConnections = 8;
 
 public:
-    ServerEndpoint(int port, int type, bool blocking);
+    ServerTcpEndpoint(int port, bool blocking);
 
     std::optional<int> tryAcceptConnection();
 
