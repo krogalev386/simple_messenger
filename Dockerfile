@@ -1,9 +1,11 @@
 FROM alpine:latest
 RUN apk update && \
-    apk add --no-cache g++ make cmake
+    apk add --no-cache clang make cmake
 WORKDIR /test_bench
 COPY . .
-RUN rm -rf build/ && mkdir build && cmake -B build . && cmake --build build -j 4
+RUN rm -rf build/ && mkdir build && \
+    cmake -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.cmake -B build . && \
+    cmake --build build -j 4
 
 FROM alpine:latest
 RUN apk update && \

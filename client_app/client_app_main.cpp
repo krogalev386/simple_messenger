@@ -119,19 +119,8 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
         Envelope env = create_text_envelope();
         write_message(buffer);
         embed_text(env, buffer);
-#if TCP_MODE_ON
-        client_tcp_point.sendEnvelope(env);
-#else
         client_udp_point.sendEnvelope(env, serv_addr);
-#endif
     }
-
-#if TCP_MODE_ON
-    Envelope env = create_text_envelope();
-    embed_text(env, "ConnectionClosed");
-    env.meta_data.header.message_type = MessageType::ServiceMessage;
-    client_tcp_point.sendEnvelope(env);
-#endif
 }
 
 int main(int argn, char* argv[])

@@ -86,11 +86,8 @@ int ServerTcpEndpoint::acceptConnection()
             client_info_storage.push_back(new_client);
             printf("Client fd %d is successfully registered\n", client_socket_id);
         }
-#if TCP_MODE_ON
-#else
         close(client_socket_id);
         printf("Connection with client_id %d closed.", client_socket_id);
-#endif
     });
     return client_socket_id;
 };

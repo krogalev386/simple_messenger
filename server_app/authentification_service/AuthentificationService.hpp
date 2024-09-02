@@ -18,5 +18,5 @@ public:
     bool checkIfRegistered(const UserCredentials&);
 
 private:
-    std::vector<std::pair<uint64_t, UserCredentials>> registered_users;
+    std::vector<std::pair<UserID, UserCredentials>> registered_users;
 };
