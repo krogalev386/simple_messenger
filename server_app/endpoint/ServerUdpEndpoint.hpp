@@ -1,13 +1,12 @@
 #pragma once
 
+#include <mutex>
+#include <optional>
+#include <vector>
+
 #include "UdpEndpointBase.hpp"
 
-#include <vector>
-#include <optional>
-#include <mutex>
-
-class ServerUdpEndpoint : public UdpEndpointBase
-{
-public:
+class ServerUdpEndpoint : public UdpEndpointBase {
+   public:
     ServerUdpEndpoint(int port, bool blocking);
 };

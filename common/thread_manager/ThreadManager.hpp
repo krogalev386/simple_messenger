@@ -1,26 +1,25 @@
 #pragma once
 
-#include <cstdint>
 #include <condition_variable>
-#include <thread>
-#include <mutex>
+#include <cstdint>
 #include <functional>
+#include <mutex>
+#include <thread>
 
-#include "CrtpSingleton.hpp"
 #include "CircularBuffer.hpp"
+#include "CrtpSingleton.hpp"
 
-class ThreadManager : public CrtpSingleton<ThreadManager>
-{
-friend class CrtpSingleton<ThreadManager>;
+class ThreadManager : public CrtpSingleton<ThreadManager> {
+    friend class CrtpSingleton<ThreadManager>;
 
-protected:
+   protected:
     ThreadManager();
     ~ThreadManager();
 
-public:
+   public:
     void schedule_task(const std::function<void()>& task);
 
-private:
+   private:
     static constexpr uint16_t thread_pool_size = 4;
     static constexpr uint16_t task_queue_size  = 4;
 

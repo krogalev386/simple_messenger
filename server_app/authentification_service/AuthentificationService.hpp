@@ -1,22 +1,21 @@
 #pragma once
 
+#include <utility>
+#include <vector>
+
 #include "CrtpSingleton.hpp"
 #include "defines.hpp"
 
-#include <vector>
-#include <utility>
+class AuthentificationService : public CrtpSingleton<AuthentificationService> {
+    friend class CrtpSingleton<AuthentificationService>;
 
-class AuthentificationService : public CrtpSingleton<AuthentificationService>
-{
-friend class CrtpSingleton<AuthentificationService>;
-
-protected:
+   protected:
     AuthentificationService();
     ~AuthentificationService() = default;
-    
-public:
+
+   public:
     bool checkIfRegistered(const UserCredentials&);
 
-private:
+   private:
     std::vector<std::pair<UserID, UserCredentials>> registered_users;
 };

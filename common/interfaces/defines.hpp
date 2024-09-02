@@ -1,69 +1,54 @@
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
 typedef uint64_t UserID;
 
-enum DataType : uint8_t
-{
-    TextMessage,
-    FileMessage
-};
+enum DataType : uint8_t { TextMessage, FileMessage };
 
-enum MessageType : uint8_t
-{
-    UserMessage,
-    ServiceMessage
-};
+enum MessageType : uint8_t { UserMessage, ServiceMessage };
 
-struct Header
-{
+struct Header {
     size_t      payload_size;
     size_t      total_size;
     MessageType message_type;
 };
 
-struct EnvelopeMeta
-{
-    Header            header;
-    DataType          type;
-    UserID            sender_id;
-    UserID            recipient_id;
+struct EnvelopeMeta {
+    Header   header;
+    DataType type;
+    UserID   sender_id;
+    UserID   recipient_id;
 };
 
-struct PhoneBookRecord
-{
+struct PhoneBookRecord {
     UserID user_id;
     char   nickname[256];
 };
 
-struct UserCredentials
-{
-    char   nickname[256];
-    char   password[256];
+struct UserCredentials {
+    char nickname[256];
+    char password[256];
 };
 
-struct SocketInfo
-{
-    sockaddr addr;
+struct SocketInfo {
+    sockaddr  addr;
     socklen_t addrlen;
 };
 
-struct ClientInfo
-{
-    int handle;
+struct ClientInfo {
+    int        handle;
     SocketInfo socket_info;
 };
 
-struct Envelope
-{
+struct Envelope {
     static constexpr size_t size = 1024;
 
-    EnvelopeMeta      meta_data;
-    char              payload[size - sizeof(EnvelopeMeta)];
+    EnvelopeMeta meta_data;
+    char         payload[size - sizeof(EnvelopeMeta)];
 };

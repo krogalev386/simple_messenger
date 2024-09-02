@@ -4,22 +4,21 @@
 #include "ServerTcpEndpoint.hpp"
 #include "ServerUdpEndpoint.hpp"
 
-class ServerManager : public CrtpSingleton<ServerManager>
-{
-friend class CrtpSingleton<ServerManager>;
+class ServerManager : public CrtpSingleton<ServerManager> {
+    friend class CrtpSingleton<ServerManager>;
 
-protected:
+   protected:
     ServerManager();
     ~ServerManager() = default;
 
-public:
+   public:
     ServerTcpEndpoint& getTcpEndPoint();
     ServerUdpEndpoint& getUdpEndPoint();
 
     void runEventLoop();
     void checkMail();
 
-private:
+   private:
     ServerTcpEndpoint endpoint;
     ServerUdpEndpoint udpEndpoint;
 };

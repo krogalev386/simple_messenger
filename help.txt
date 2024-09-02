@@ -9,3 +9,6 @@ docker run --rm -it --name server (or client) --security-opt seccomp=unconfined 
 
 # compile with clang-tidy check
 rm -rf *; cmake -DCLANG_TIDY_CHECK=1 -DCMAKE_TOOLCHAIN_FILE=../CMakeToolchain.cmake ..; cmake --build . -j 4
+
+# run clang-format
+./tools/style-formatter.sh
