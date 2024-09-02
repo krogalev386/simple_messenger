@@ -20,7 +20,7 @@ public:
     int    acceptConnection();
     int    authentificateUser(int client_socket_id);
     int    getClientHandle(size_t index);
-    size_t numOfConnections();
+    size_t numOfConnections() const;
 
 private:
     void sendAcceptNotificaton(bool is_accepted, int client_socket_id);

@@ -18,7 +18,7 @@ protected:
     ~ThreadManager();
 
 public:
-    void schedule_task(std::function<void()> task);
+    void schedule_task(const std::function<void()>& task);
 
 private:
     static constexpr uint16_t thread_pool_size = 4;

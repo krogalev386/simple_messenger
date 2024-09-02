@@ -22,15 +22,15 @@ public:
 
     sockaddr_in getAddress() { return address; }
 
-    std::tuple<bool, bool> pollSocket(int socket_id);
+    static std::tuple<bool, bool> pollSocket(int socket_id);
 
 protected:
 
 protected:
-    sockaddr_in address;
+    sockaddr_in address{};
 
     int  socket_id;
-    int  status;
+    int  status{};
     bool valid_flag;
-    char buffer[buff_size];
+    char buffer[buff_size]{};
 };

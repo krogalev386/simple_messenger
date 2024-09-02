@@ -3,9 +3,9 @@
 
 #include "defines.hpp"
 
-#include <vector>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <vector>
 
 constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
 
@@ -23,14 +23,14 @@ Envelope create_text_envelope()
             .recipient_id = 2,
         }
     };
-    return std::move(env);
+    return env;
 }
 
 Envelope create_auth_envelope()
 {
     Envelope env = create_text_envelope();
     env.meta_data.header.message_type = MessageType::ServiceMessage;
-    return std::move(env);
+    return env;
 }
 
 void embed_text(Envelope& env, char* text_buffer)
@@ -66,13 +66,13 @@ void client_main()
 };
 #endif
 
-void client_interactive_main(size_t port_id = 11111, const char* ip_string = "127.0.0.1")
+void client_interactive_main(size_t port_id, const char* ip_string)
 {
     // Connection:
     ClientTcpEndpoint client_tcp_point(port_id);
     ClientUdpEndpoint client_udp_point(11112);
 
-    sockaddr_in server_addr;
+    sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
     server_addr.sin_port   = htons(11112);
     inet_pton(AF_INET, ip_string, &server_addr.sin_addr);
@@ -82,7 +82,7 @@ void client_interactive_main(size_t port_id = 11111, const char* ip_string = "12
 
 
     // Authentification:
-    UserCredentials credentials;
+    UserCredentials credentials{};
 
     printf("Enter your credentials\n");
     printf("Enter your username:\n");
@@ -127,7 +127,7 @@ int main(int argn, char* argv[])
 {
     if (argn == 1)
     {
-        client_interactive_main();
+        client_interactive_main(11111,"127.0.0.1");
     }
     else if (argn == 2)
     {

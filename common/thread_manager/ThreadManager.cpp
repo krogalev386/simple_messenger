@@ -1,15 +1,15 @@
 #include "ThreadManager.hpp"
 
-#include <condition_variable>
 #include <chrono>
-#include <mutex>
+#include <condition_variable>
 #include <functional>
+#include <mutex>
 
 #include "Logger.hpp"
 
-ThreadManager::ThreadManager()
+ThreadManager::ThreadManager() : is_running(true)
 {
-    is_running = true;
+    
     auto task_queue_handling = [this]{
         while(true)
         {
@@ -50,7 +50,7 @@ ThreadManager::~ThreadManager()
     }
 };
 
-void ThreadManager::schedule_task(std::function<void()> new_task)
+void ThreadManager::schedule_task(const std::function<void()>& new_task)
 {
     {
         task_queue_mtx.lock();

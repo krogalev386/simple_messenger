@@ -2,8 +2,8 @@
 
 #include "defines.hpp"
 
-#include <vector>
 #include <cstring>
+#include <vector>
 
 namespace message_processing
 {
@@ -17,9 +17,9 @@ namespace message_processing
 
     Envelope unpack_message(const char* buffer, size_t len)
     {
-        Envelope envelope;
+        Envelope envelope{};
         memset(&envelope, 0, Envelope::size);
         memcpy(&envelope, buffer, len);
-        return std::move(envelope);
+        return envelope;
     };
-};
+}  // namespace message_processing

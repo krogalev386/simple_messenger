@@ -3,18 +3,18 @@
 #include "Logger.hpp"
 
 #include <arpa/inet.h>
+#include <cstdio>
 #include <cstring>
 #include <netinet/in.h>
+#include <optional>
 #include <poll.h>
 #include <sys/socket.h>
-#include <stdio.h>
-#include <vector>
 #include <unistd.h>
-#include <optional>
+#include <vector>
 
-EndpointBase::EndpointBase(int port, int type, int protocol, bool blocking)
+EndpointBase::EndpointBase(int port, int type, int protocol, bool blocking) : valid_flag(true)
 {
-    valid_flag = true;
+    
     if (not blocking)
     {
         type |= SOCK_NONBLOCK;
@@ -32,7 +32,7 @@ EndpointBase::EndpointBase(int port, int type, int protocol, bool blocking)
 EndpointBase::~EndpointBase()
 {
     status = close(socket_id);
-    if (status)
+    if (status != 0)
     {
         perror("Socket closing is failed");
     }
@@ -47,7 +47,7 @@ std::tuple<bool, bool> EndpointBase::pollSocket(int socket_id)
     bool ready_to_hanlde = false;
     bool err_or_closed   = false;
 
-    pollfd p_fd;
+    pollfd p_fd{};
     p_fd.fd = socket_id;
     p_fd.events = POLLIN;
     int poll_res = poll(&p_fd, 1, 100);
@@ -60,14 +60,14 @@ std::tuple<bool, bool> EndpointBase::pollSocket(int socket_id)
         return {ready_to_hanlde, err_or_closed};
     }
 
-    err_or_closed = ((p_fd.revents & POLLHUP) | (p_fd.revents & POLLERR)) ? true : false;
+    err_or_closed = ((p_fd.revents & POLLHUP) | (p_fd.revents & POLLERR)) != 0;
     if (err_or_closed)
     {
         LOG("Connection closed");
         return {ready_to_hanlde, err_or_closed};
     }
 
-    ready_to_hanlde = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) ? true : false;
+    ready_to_hanlde = ((p_fd.revents & POLLIN) | (p_fd.revents & POLLPRI)) != 0;
     if (ready_to_hanlde)
     {
         LOG("ready_to_hanlde = %d, p_fd.revents = %d", ready_to_hanlde, p_fd.revents);

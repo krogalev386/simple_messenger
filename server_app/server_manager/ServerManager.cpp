@@ -2,13 +2,13 @@
 
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
-#include "ThreadManager.hpp"
 #include "ServerTcpEndpoint.hpp"
+#include "ThreadManager.hpp"
 
-#include <optional>
 #include <cstdio>
+#include <cstring>
 #include <mutex>
-#include <string.h>
+#include <optional>
 
 ServerManager::ServerManager() : endpoint(11111, false), udpEndpoint(11112, false)
 {

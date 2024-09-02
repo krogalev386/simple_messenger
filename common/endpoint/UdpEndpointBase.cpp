@@ -15,7 +15,7 @@ void UdpEndpointBase::sendEnvelope(const Envelope& envelope, const SocketInfo& r
 
 Envelope UdpEndpointBase::receiveEnvelopeFrom(const SocketInfo& sender_info)
 {
-    Envelope env;
+    Envelope env{};
     memset(&env, 0, sizeof(Envelope));
     int64_t n_bytes = recvfrom(socket_id, &env, sizeof(Envelope), 0,
                                const_cast<sockaddr*>(&sender_info.addr),
@@ -26,7 +26,7 @@ Envelope UdpEndpointBase::receiveEnvelopeFrom(const SocketInfo& sender_info)
 
 Envelope UdpEndpointBase::receiveEnvelope()
 {
-    Envelope env;
+    Envelope env{};
     memset(&env, 0, sizeof(Envelope));
     int64_t n_bytes = recv(socket_id, &env, sizeof(Envelope), 0);
     LOG("%ld bytes has been received over UDP", n_bytes);
@@ -40,10 +40,7 @@ std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelopeFrom(const SocketInfo
     {
         return receiveEnvelopeFrom(sender_info);
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 }
 
 std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope()
@@ -53,8 +50,5 @@ std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope()
     {
         return receiveEnvelope();
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 }

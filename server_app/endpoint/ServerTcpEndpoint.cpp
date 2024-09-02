@@ -7,19 +7,19 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstring>
+#include <netinet/in.h>
 #include <optional>
 #include <poll.h>
-#include <netinet/in.h>
-#include <vector>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
 ServerTcpEndpoint::ServerTcpEndpoint(int port, bool blocking) : TcpEndpointBase(port, 0, blocking)
 {
     client_info_storage = std::vector<ClientInfo>();
     address.sin_addr.s_addr = INADDR_ANY;
     status = bind(socket_id, reinterpret_cast<sockaddr*>(&address), sizeof(address));
-    if (status)
+    if (status != 0)
     {
         perror("Error: socket binding failed");
     }
@@ -28,7 +28,7 @@ ServerTcpEndpoint::ServerTcpEndpoint(int port, bool blocking) : TcpEndpointBase(
 void ServerTcpEndpoint::listenConnections()
 {
     status = listen(socket_id, maxTcpConnections);
-    if (status)
+    if (status != 0)
     {
         perror("Error: socket listening fails");
     }
@@ -36,7 +36,7 @@ void ServerTcpEndpoint::listenConnections()
 
 void ServerTcpEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socket_id)
 {
-    Envelope refuse_notification;
+    Envelope refuse_notification{};
     refuse_notification.meta_data.header.message_type = MessageType::ServiceMessage;
     char refuse_text[] = "REJECTED";
     char accept_text[] = "ACCEPTED";
@@ -53,12 +53,10 @@ void ServerTcpEndpoint::sendAcceptNotificaton(bool is_accepted, int client_socke
 
 int ServerTcpEndpoint::acceptConnection()
 {
-    ClientInfo new_client;
-    int client_socket_id;
+    ClientInfo new_client{};
+    int client_socket_id = 0;
 
-    client_socket_id = accept(socket_id,
-                              &new_client.socket_info.addr,
-                              &new_client.socket_info.addrlen);
+    client_socket_id = accept4(socket_id, &new_client.socket_info.addr, &new_client.socket_info.addrlen, SOCK_CLOEXEC);
 
     LOG("client socket id: %d", client_socket_id);
     if (client_socket_id < 0)
@@ -101,7 +99,7 @@ int ServerTcpEndpoint::authentificateUser(int client_socket_id)
 
     if (msgType == MessageType::ServiceMessage)
     {
-        UserCredentials credentials;
+        UserCredentials credentials{};
         memcpy(&credentials, &(credentials_envlp.payload), sizeof(UserCredentials));
         LOG("Connection attempt from user %s, %s, socket %d", credentials.nickname, credentials.password, client_socket_id);
         bool is_registered = AuthentificationService::getInstance().checkIfRegistered(credentials);
@@ -130,10 +128,7 @@ std::optional<int> ServerTcpEndpoint::tryAcceptConnection()
     {
         return acceptConnection();
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 };
 
 int ServerTcpEndpoint::getClientHandle(size_t index)
@@ -141,7 +136,7 @@ int ServerTcpEndpoint::getClientHandle(size_t index)
     return client_info_storage[index].handle;
 };
 
-size_t ServerTcpEndpoint::numOfConnections()
+size_t ServerTcpEndpoint::numOfConnections() const
 {
     return client_info_storage.size();
 };

@@ -5,8 +5,8 @@
 
 AuthentificationService::AuthentificationService()
 {
-    auto user_1 = std::make_pair<UserID, UserCredentials>(1, UserCredentials{"client_a", "client_a"});
-    auto user_2 = std::make_pair<UserID, UserCredentials>(2, UserCredentials{"client_b", "client_b"});
+    auto user_1 = std::pair<UserID, UserCredentials>(1, UserCredentials{"client_a", "client_a"});
+    auto user_2 = std::pair<UserID, UserCredentials>(2, UserCredentials{"client_b", "client_b"});
     registered_users.push_back(user_1);
     registered_users.push_back(user_2);
 };
@@ -22,9 +22,5 @@ bool AuthentificationService::checkIfRegistered(const UserCredentials& considere
                                    }
                                );
 
-    if (record != registered_users.end())
-    {
-        return true;
-    }
-    return false;
+    return record != registered_users.end();
 }

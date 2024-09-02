@@ -1,12 +1,12 @@
 #include "ServerTcpEndpoint.hpp"
-#include "ServerManager.hpp"
 #include "MessageProcessing.hpp"
+#include "ServerManager.hpp"
 
-#include <vector>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <vector>
 
-int main(int argn, char* argv[])
+int main(int  /*argn*/, char*  /*argv*/[])
 {
     ServerManager::getInstance().runEventLoop();
 }

@@ -15,7 +15,7 @@ void TcpEndpointBase::sendEnvelope(const Envelope& envelope, int receiver_handle
 Envelope TcpEndpointBase::receiveEnvelope(int sender_handle)
 {
     sender_handle = (sender_handle == 0) ? socket_id : sender_handle;
-    Envelope env;
+    Envelope env{};
     memset(&env, 0, sizeof(Envelope));
     int64_t n_bytes = recv(sender_handle, &env, sizeof(Envelope), 0);
     LOG("%ld bytes has been received", n_bytes);
@@ -29,8 +29,5 @@ std::optional<Envelope> TcpEndpointBase::tryReceiveEnvelope(int sender_handle)
     {
         return receiveEnvelope(sender_handle);
     }
-    else
-    {
-        return std::nullopt;
-    }
+    return std::nullopt;
 }
