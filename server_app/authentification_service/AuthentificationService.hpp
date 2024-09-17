@@ -3,11 +3,12 @@
 #include <utility>
 #include <vector>
 
-#include "CrtpSingleton.hpp"
+#include "DynamicCrtpSingleton.hpp"
 #include "defines.hpp"
 
-class AuthentificationService : public CrtpSingleton<AuthentificationService> {
-    friend class CrtpSingleton<AuthentificationService>;
+class AuthentificationService
+    : public DynamicCrtpSingleton<AuthentificationService> {
+    friend class DynamicCrtpSingleton<AuthentificationService>;
 
    protected:
     AuthentificationService();

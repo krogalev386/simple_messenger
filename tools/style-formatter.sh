@@ -3,7 +3,7 @@
 cd "$(dirname "$0")"
 cd ..
 
-code_files=$(find . | grep -e .hpp -e .cpp)
+code_files=$(find . | grep -e '.hpp$' -e '.cpp$')
 
 for file in ${code_files[@]};
 do

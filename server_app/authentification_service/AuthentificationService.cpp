@@ -4,10 +4,10 @@
 #include <cstring>
 
 AuthentificationService::AuthentificationService() {
-    auto user_1 = std::pair<UserID, UserCredentials>(
-        1, UserCredentials{"client_a", "client_a"});
-    auto user_2 = std::pair<UserID, UserCredentials>(
-        2, UserCredentials{"client_b", "client_b"});
+    auto user_1 =
+        std::pair<UserID, UserCredentials>(1, UserCredentials{"a", "a"});
+    auto user_2 =
+        std::pair<UserID, UserCredentials>(2, UserCredentials{"b", "b"});
     registered_users.push_back(user_1);
     registered_users.push_back(user_2);
 };

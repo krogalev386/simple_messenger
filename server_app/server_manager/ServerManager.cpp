@@ -16,6 +16,10 @@ ServerManager::ServerManager()
     ThreadManager::init();
 };
 
+ServerManager::~ServerManager() {
+    AuthentificationService::destroy();
+    ThreadManager::destroy();
+}
 ServerTcpEndpoint& ServerManager::getTcpEndPoint() { return endpoint; };
 
 ServerUdpEndpoint& ServerManager::getUdpEndPoint() { return udpEndpoint; };

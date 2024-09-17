@@ -7,10 +7,10 @@
 #include <thread>
 
 #include "CircularBuffer.hpp"
-#include "CrtpSingleton.hpp"
+#include "DynamicCrtpSingleton.hpp"
 
-class ThreadManager : public CrtpSingleton<ThreadManager> {
-    friend class CrtpSingleton<ThreadManager>;
+class ThreadManager : public DynamicCrtpSingleton<ThreadManager> {
+    friend class DynamicCrtpSingleton<ThreadManager>;
 
    protected:
     ThreadManager();

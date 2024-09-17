@@ -1,15 +1,15 @@
 #pragma once
 
-#include "CrtpSingleton.hpp"
 #include "ServerTcpEndpoint.hpp"
 #include "ServerUdpEndpoint.hpp"
+#include "StaticCrtpSingleton.hpp"
 
-class ServerManager : public CrtpSingleton<ServerManager> {
-    friend class CrtpSingleton<ServerManager>;
+class ServerManager : public StaticCrtpSingleton<ServerManager> {
+    friend class StaticCrtpSingleton<ServerManager>;
 
    protected:
     ServerManager();
-    ~ServerManager() = default;
+    ~ServerManager();
 
    public:
     ServerTcpEndpoint& getTcpEndPoint();

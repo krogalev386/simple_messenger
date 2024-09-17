@@ -6,12 +6,12 @@
 #include <mutex>
 #include <string>
 
-#include "CrtpSingleton.hpp"
+#include "StaticCrtpSingleton.hpp"
 
 #define LOG(x...) Logger::getInstance().log(__func__, x);
 
-class Logger : public CrtpSingleton<Logger> {
-    friend class CrtpSingleton<Logger>;
+class Logger : public StaticCrtpSingleton<Logger> {
+    friend class StaticCrtpSingleton<Logger>;
 
    protected:
     Logger() { log_file_handle = std::fopen("runtime.log", "w"); };
