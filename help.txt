@@ -7,6 +7,12 @@ docker image rm build_messenger
 # run container
 docker run --rm -it --name server (or client) --security-opt seccomp=unconfined build_messenger
 
+# run docker-compose
+docker compose up -d
+
+# shut down docker-compose containers
+docker compose down
+
 # compile with clang-tidy check
 rm -rf *; cmake -DCLANG_TIDY_CHECK=1 -DCMAKE_TOOLCHAIN_FILE=../CMakeToolchain.cmake ..; cmake --build . -j 4
 

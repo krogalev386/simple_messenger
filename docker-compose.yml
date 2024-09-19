@@ -1,0 +1,36 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./docker/server/Dockerfile
+    stdin_open: true
+    tty: true
+    networks:
+      usernet:
+        ipv4_address: 10.5.0.5
+  client1:
+    build:
+      context: .
+      dockerfile: ./docker/client/Dockerfile
+    stdin_open: true
+    tty: true
+    networks:
+      usernet:
+        ipv4_address: 10.5.0.6
+  client2:
+    build:
+      context: .
+      dockerfile: ./docker/client/Dockerfile
+    stdin_open: true
+    tty: true
+    networks:
+      usernet:
+        ipv4_address: 10.5.0.7
+
+networks:
+  usernet:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
