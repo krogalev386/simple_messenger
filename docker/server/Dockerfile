@@ -15,4 +15,4 @@ RUN apk update && \
     apk add util-linux
 WORKDIR /test_bench
 COPY --from=0 /test_bench/build .
-ENTRYPOINT /bin/sh
+ENTRYPOINT /test_bench/server_app/server_app
