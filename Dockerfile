@@ -1,17 +1,30 @@
-FROM alpine:latest
-RUN apk update && \
-    apk add --no-cache clang make cmake
-WORKDIR /test_bench
-COPY . .
-RUN rm -rf build/ && mkdir build && \
-    cmake -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.cmake -B build . && \
-    cmake --build build -j 4
+# Developement container
 
-FROM alpine:latest
-RUN apk update && \
-    apk add --no-cache libstdc++ && \
-    apk add gdb && \
-    apk add util-linux
-WORKDIR /test_bench
-COPY --from=0 /test_bench/build .
-ENTRYPOINT /bin/sh 
+FROM ubuntu:jammy
+
+# Install docker stuff
+RUN apt update && \
+    apt install -y docker && \
+    apt install -y docker.io && \
+    apt install -y docker-compose-v2
+
+# Install C++ utilities
+RUN apt install -y clang && \
+    apt install -y make && \
+    apt install -y cmake && \
+    apt install -y clang-tidy && \
+    apt purge -y gcc
+
+# Install git
+RUN apt install -y git
+
+# Install Python tools and utilities
+RUN apt install -y pip && \
+    pip install doit
+
+# Install data base server
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y postgresql
+
+WORKDIR /workdir/messenger
+ENTRYPOINT /bin/bash

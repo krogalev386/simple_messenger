@@ -1,11 +1,11 @@
-# build docker image
-docker build -t build_messenger .
+# build dev docker image
+docker build -t dev_image .
 
-# delete image
-docker image rm build_messenger
+# delete dev image
+docker image rm dev_image
 
-# run container
-docker run --rm -it --name server (or client) --security-opt seccomp=unconfined build_messenger
+# run dev container
+docker run --rm -it --security-opt seccomp=unconfined -v .:/workdir/messenger -v /var/run/docker.sock:/var/run/docker.sock dev_image
 
 # run and rebuild docker-compose
 docker compose up -d --build
