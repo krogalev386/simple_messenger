@@ -1,11 +1,17 @@
 # build dev docker image
 docker build -t dev_image .
+or
+doit build_dev_env
 
 # delete dev image
 docker image rm dev_image
+or
+doit rm_dev_env
 
 # run dev container
 docker run --rm -it --security-opt seccomp=unconfined -v .:/workdir/messenger -v /var/run/docker.sock:/var/run/docker.sock dev_image
+or
+doit run_dev_env
 
 # run and rebuild docker-compose
 docker compose up -d --build
@@ -15,6 +21,8 @@ docker compose down
 
 # compile with clang-tidy check
 rm -rf *; cmake -DCLANG_TIDY_CHECK=1 -DCMAKE_TOOLCHAIN_FILE=../CMakeToolchain.cmake ..; cmake --build . -j 4
+or
+doit rebuild_project
 
 # run clang-format
 ./tools/style-formatter.sh

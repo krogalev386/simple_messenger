@@ -2,14 +2,14 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./docker/server/Dockerfile
+      dockerfile: ./tools/docker/server/Dockerfile
     networks:
       usernet:
         ipv4_address: 10.5.0.5
   client1:
     build:
       context: .
-      dockerfile: ./docker/client/Dockerfile
+      dockerfile: ./tools/docker/client/Dockerfile
     stdin_open: true
     tty: true
     networks:
@@ -18,7 +18,7 @@ services:
   client2:
     build:
       context: .
-      dockerfile: ./docker/client/Dockerfile
+      dockerfile: ./tools/docker/client/Dockerfile
     stdin_open: true
     tty: true
     networks:

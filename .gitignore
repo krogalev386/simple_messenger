@@ -33,3 +33,9 @@
 
 # Artifacts
 build/*
+
+# doit db
+.doit.db
+
+# Python cache
+*__pycache__*
