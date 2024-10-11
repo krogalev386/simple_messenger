@@ -1,19 +1,12 @@
 import os
 
-PROJECT_ROOT_DIR_HOST = '.'
-PROJECT_ROOT_DIR_CONT = '/workdir/messenger'
-DOCKER_SOCK = '/var/run/docker.sock'
+from constants import *
 
 LIST_OF_MOUNTS_FOR_DEV = [
     f'{PROJECT_ROOT_DIR_HOST}:{PROJECT_ROOT_DIR_CONT}',
     f'{DOCKER_SOCK}:{DOCKER_SOCK}'
 ]
 
-DOCKER_RUN_CMD = ['docker', 'run']
-DEV_IMAGE_NAME = ['dev_image']
-DEFAULT_RUN_ARGS = ['--rm', '-it', '--security-opt seccomp=unconfined']
-CUSTOM_RUN_ARGS = []
-RUN_ARGS = DEFAULT_RUN_ARGS + CUSTOM_RUN_ARGS
 
 # Docker management
 def docker_run_args_list(mounts_list: list[str]) -> list[str]:
@@ -41,10 +34,21 @@ def build_dev_image() -> None:
     cmd = build_dev_image_cmd()
     os.system(f'{cmd}')
 
-def rm_dev_image() -> str:
+def rm_dev_image() -> None:
     cmd = rm_dev_image_cmd()
     os.system(f'{cmd}')
 
+def run_postgres_container() -> None:
+    os.system(f'docker run -d --name {POSTGRES_CONTAINER_NANE} \
+                              --network {BACKEND_NETWORK_NAME} \
+                              --ip {POSTGRES_IPADDR} \
+                              -e POSTGRES_PASSWORD={POSTGRES_ADMIN_PASS} \
+                              {POSTGRES_IMAGE_VERSION}')
+
+def shutdown_postgres_container() -> None:
+    os.system(f'docker stop {POSTGRES_CONTAINER_NANE}')
+    os.system(f'docker rm {POSTGRES_CONTAINER_NANE}')
+    
 
 # Project build
 

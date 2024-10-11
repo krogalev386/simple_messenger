@@ -6,6 +6,8 @@ services:
     networks:
       usernet:
         ipv4_address: 10.5.0.5
+      backend:
+        ipv4_address: 11.0.0.4
   client1:
     build:
       context: .
@@ -32,3 +34,6 @@ networks:
      config:
        - subnet: 10.5.0.0/16
          gateway: 10.5.0.1
+  backend:
+    name: "messenger_backend"
+    external: true

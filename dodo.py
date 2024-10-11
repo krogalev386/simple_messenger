@@ -1,4 +1,7 @@
-import tools.py3.cmd_shortcuts as docker_cmds
+import sys, os
+sys.path.append( f'{os.getcwd()}/tools/py3' )
+
+import cmd_shortcuts as docker_cmds
 
 DOIT_CONFIG = {'default_tasks': []}
 
@@ -38,4 +41,14 @@ def task_rebuild_project():
             docker_cmds.clear_project,
             docker_cmds.build_project,
         ],
+    }
+
+def task_setup_psql():
+    return {
+        'actions': [docker_cmds.run_postgres_container],
+    }
+
+def task_shutdown_psql():
+    return {
+        'actions': [docker_cmds.shutdown_postgres_container],
     }

@@ -13,7 +13,7 @@ RUN apt install -y clang && \
     apt install -y make && \
     apt install -y cmake && \
     apt install -y clang-tidy && \
-    apt purge -y gcc
+    apt install -y g++
 
 # Install git
 RUN apt install -y git
@@ -23,7 +23,8 @@ RUN apt install -y python3-doit
 
 # Install data base server
 RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y postgresql
+    apt install -y postgresql && \
+    apt install -y libpq-dev
 
 WORKDIR /workdir/messenger
 ENTRYPOINT /bin/bash
