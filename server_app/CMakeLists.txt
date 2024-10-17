@@ -1,5 +1,6 @@
 add_subdirectory(authentification_service)
 add_subdirectory(endpoint)
+add_subdirectory(psql_manager)
 add_subdirectory(server_manager)
 
 add_executable(server_app server_app_main.cpp)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd "$(dirname "$0")"
-cd ..
+cd ../..
 
 code_files=$(find . | grep -e '.hpp$' -e '.cpp$')
 

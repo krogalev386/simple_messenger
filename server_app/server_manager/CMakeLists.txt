@@ -9,4 +9,5 @@ target_link_libraries(server_manager_lib
         logger_lib_if
         thread_manager_lib
         utilities_lib_if
+        psql_manager_lib
 )
