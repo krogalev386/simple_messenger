@@ -2,26 +2,23 @@
 
 #include <algorithm>
 #include <cstring>
+#include <optional>
 
-AuthentificationService::AuthentificationService() {
-    auto user_1 =
-        std::pair<UserID, UserCredentials>(1, UserCredentials{"a", "a"});
-    auto user_2 =
-        std::pair<UserID, UserCredentials>(2, UserCredentials{"b", "b"});
-    registered_users.push_back(user_1);
-    registered_users.push_back(user_2);
-};
+#include "PsqlManager.hpp"
+#include "defines.hpp"
 
-bool AuthentificationService::checkIfRegistered(
+AuthentificationService::AuthentificationService() = default;
+;
+
+std::optional<UserID> AuthentificationService::checkIfRegistered(
     const UserCredentials& considered_cred) {
-    auto record = std::find_if(
-        registered_users.begin(), registered_users.end(),
-        [&considered_cred](const std::pair<UserID, UserCredentials>& cred) {
-            return (strcmp(cred.second.nickname, considered_cred.nickname) ==
-                    0) and
-                   (strcmp(cred.second.password, considered_cred.password) ==
-                    0);
-        });
+    auto& psql_db = PsqlManager::getInstance();
 
-    return record != registered_users.end();
+    if (!psql_db.isConnected()) {
+        printf("Authentification error: no connection to database\n");
+        return std::nullopt;
+    }
+
+    auto user_id = PsqlManager::getInstance().findUserByCreds(considered_cred);
+    return user_id;
 }

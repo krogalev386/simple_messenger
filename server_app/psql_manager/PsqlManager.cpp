@@ -69,6 +69,7 @@ std::optional<UserID> PsqlManager::registerNewUser(const char* name,
     printf("Data inserted successfully.\n");
     auto new_user_id =
         static_cast<UserID>(std::atoi(PQgetvalue(pg_result, 0, 0)));
+    PQclear(pg_result);
     return new_user_id;
 };
 
@@ -77,15 +78,32 @@ std::optional<UserID> PsqlManager::removeUser(const UserID /*user_id*/) {
     return std::nullopt;
 };
 
-std::optional<UserID> PsqlManager::findUserByEmail(const char* /*email*/) {
-    // TO DO;
-    return std::nullopt;
-};
+std::optional<UserID> PsqlManager::findUserByCreds(
+    const UserCredentials& creds) {
+    std::string select_req =
+        "SELECT id FROM users WHERE email='" + std::string(creds.email) + "'" +
+        " AND password='" + std::string(creds.password) + "'";
 
-std::optional<UserCredentials> PsqlManager::retriveUserCredsByID(
-    const UserID /*unused*/) {
-    // TO DO;
-    return std::nullopt;
+    pg_result = PQexec(pg_connection, select_req.data());
+
+    if (PQresultStatus(pg_result) != PGRES_TUPLES_OK) {
+        fprintf(stderr, "Error requesting data: %s\n",
+                PQerrorMessage(pg_connection));
+        LOG("Error requesting data: %s\n", PQerrorMessage(pg_connection));
+        PQclear(pg_result);
+        return std::nullopt;
+    }
+    if (PQntuples(pg_result) < 1) {
+        fprintf(stderr, "Error requesting data: No user found\n");
+        LOG("Error requesting data: No user found\n");
+        PQclear(pg_result);
+        return std::nullopt;
+    }
+    auto user_id = static_cast<UserID>(std::atoi(PQgetvalue(pg_result, 0, 0)));
+    PQclear(pg_result);
+    printf("User %lu found", user_id);
+    LOG("User %lu found", user_id);
+    return user_id;
 };
 
 void PsqlManager::closeConnection() {

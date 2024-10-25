@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
@@ -59,7 +60,14 @@ void client_main()
 };
 #endif
 
-void client_interactive_main(size_t port_id, const char* ip_string) {
+UserCredentials user_cred[] = {
+    {"user1@mail.com", "user1_pass"},
+    {"user2@mail.com", "user2_pass"},
+    {"user3@mail.com", "user3_pass"}
+};
+
+void client_interactive_main(size_t port_id, const char* ip_string,
+                             int user_num) {
     // Connection:
     ClientTcpEndpoint client_tcp_point(port_id);
     ClientUdpEndpoint client_udp_point(11112);
@@ -74,16 +82,18 @@ void client_interactive_main(size_t port_id, const char* ip_string) {
     client_tcp_point.connectTo(ip_string, port_id);
 
     // Authentification:
-    UserCredentials credentials{};
+    /*UserCredentials credentials{};
 
     printf("Enter your credentials\n");
-    printf("Enter your username:\n");
-    scanf("%s", credentials.nickname);
+    printf("Enter your email:\n");
+    scanf("%s", credentials.email);
     printf("Enter your password:\n");
-    scanf("%s", credentials.password);
+    scanf("%s", credentials.password);*/
 
     Envelope auth_message = create_auth_envelope();
-    memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
+    // memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
+    memcpy(&auth_message.payload, &user_cred[user_num],
+           sizeof(UserCredentials));
 
     client_tcp_point.sendEnvelope(auth_message);
 
@@ -94,13 +104,15 @@ void client_interactive_main(size_t port_id, const char* ip_string) {
         return;
     }
 
-    bool is_accepted = (strcmp(acknowledge_env.payload, "ACCEPTED") == 0);
+    AuthResponse resp{};
+    memcpy(&resp, &acknowledge_env.payload, sizeof(resp));
+    bool is_accepted = resp.is_accepted;
 
     if (not is_accepted) {
         printf("Connection refused, please try again\n");
         return;
     }
-
+    printf("Access granted, your user ID is %lu\n", resp.user_id);
     // Job loop
     char buffer[buffer_size];
     memset(buffer, 0, sizeof(buffer));
@@ -114,10 +126,10 @@ void client_interactive_main(size_t port_id, const char* ip_string) {
 }
 
 int main(int argn, char* argv[]) {
-    if (argn == 1) {
-        client_interactive_main(11111, "127.0.0.1");
-    } else if (argn == 2) {
-        client_interactive_main(11111, argv[1]);
+    if (argn == 2) {
+        client_interactive_main(11111, "127.0.0.1", std::atoi(argv[1]));
+    } else if (argn == 3) {
+        client_interactive_main(11111, argv[1], std::atoi(argv[2]));
     } else {
         printf("Too many args; the client has not started\n");
     }

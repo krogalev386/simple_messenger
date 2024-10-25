@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -15,8 +16,8 @@ class AuthentificationService
     ~AuthentificationService() = default;
 
    public:
-    bool checkIfRegistered(const UserCredentials&);
+    static std::optional<UserID> checkIfRegistered(const UserCredentials&);
 
-   private:
-    std::vector<std::pair<UserID, UserCredentials>> registered_users;
+    // private:
+    //  std::vector<std::pair<UserID, UserCredentials>> registered_users;
 };

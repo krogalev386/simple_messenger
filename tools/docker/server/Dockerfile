@@ -1,6 +1,7 @@
 FROM alpine:latest
 RUN apk update && \
-    apk add --no-cache clang make cmake
+    apk add --no-cache clang make cmake && \
+    apk add libpq-dev
 WORKDIR /test_bench
 # copy project files from upper level directory
 COPY . .
@@ -12,7 +13,8 @@ FROM alpine:latest
 RUN apk update && \
     apk add --no-cache libstdc++ && \
     apk add gdb && \
-    apk add util-linux
+    apk add util-linux && \
+    apk add libpq-dev
 WORKDIR /test_bench
 COPY --from=0 /test_bench/build .
 ENTRYPOINT /test_bench/server_app/server_app

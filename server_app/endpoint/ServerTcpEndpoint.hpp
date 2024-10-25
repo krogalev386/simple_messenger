@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "TcpEndpointBase.hpp"
+#include "defines.hpp"
 
 class ServerTcpEndpoint : public TcpEndpointBase {
    private:
@@ -17,12 +18,14 @@ class ServerTcpEndpoint : public TcpEndpointBase {
 
     void   listenConnections();
     int    acceptConnection();
-    int    authentificateUser(int client_socket_id);
-    int    getClientHandle(size_t index);
     size_t numOfConnections() const;
+    int    getClientHandle(size_t index);
+
+    std::optional<UserID> authentificateUser(int client_socket_id);
 
    private:
-    void sendAcceptNotificaton(bool is_accepted, int client_socket_id);
+    void sendAcceptNotificaton(bool is_accepted, int client_socket_id,
+                               UserID user_id);
 
    public:
     std::vector<ClientInfo> client_info_storage;

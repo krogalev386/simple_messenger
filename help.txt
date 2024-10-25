@@ -41,3 +41,6 @@ doit setup_psql
 
 # kill PostgreSQL container
 doit shutdown_psql
+
+# remove docker compose images
+docker image rm $(docker images -f "reference=messenger*" -q)

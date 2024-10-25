@@ -31,8 +31,13 @@ struct PhoneBookRecord {
     char   nickname[256];
 };
 
+struct AuthResponse {
+    bool   is_accepted;
+    UserID user_id;
+};
+
 struct UserCredentials {
-    char nickname[256];
+    char email[256];
     char password[256];
 };
 

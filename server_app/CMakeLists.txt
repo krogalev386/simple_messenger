@@ -10,5 +10,4 @@ target_link_libraries(server_app
         msg_itf_lib_if
         server_manager_lib
         server_endpoints_lib
-        message_processor_lib
 )

@@ -35,9 +35,7 @@ class PsqlManager : public StaticCrtpSingleton<PsqlManager> {
                                                  const char* password,
                                                  const char* email);
     static std::optional<UserID> removeUser(const UserID user_id);
-    static std::optional<UserID> findUserByEmail(const char* email);
-
-    static std::optional<UserCredentials> retriveUserCredsByID(const UserID);
+    std::optional<UserID>        findUserByCreds(const UserCredentials& creds);
 
     void closeConnection();
 };
