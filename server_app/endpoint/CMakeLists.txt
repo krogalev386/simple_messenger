@@ -13,5 +13,5 @@ target_link_libraries(server_endpoints_lib
         common_endpoints_lib
         thread_manager_lib
         msg_itf_lib_if
-        message_processor_lib
+        message_processor_lib_if
 )

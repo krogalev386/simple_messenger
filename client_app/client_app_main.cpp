@@ -5,6 +5,7 @@
 
 #include "ClientTcpEndpoint.hpp"
 #include "ClientUdpEndpoint.hpp"
+#include "MessageProcessing.hpp"
 #include "defines.hpp"
 
 constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
@@ -92,8 +93,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
 
     Envelope auth_message = create_auth_envelope();
     // memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
-    memcpy(&auth_message.payload, &user_cred[user_num],
-           sizeof(UserCredentials));
+    msg_proc::set_payload<UserCredentials>(auth_message, user_cred[user_num]);
 
     client_tcp_point.sendEnvelope(auth_message);
 
@@ -104,8 +104,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
         return;
     }
 
-    AuthResponse resp{};
-    memcpy(&resp, &acknowledge_env.payload, sizeof(resp));
+    auto resp        = msg_proc::get_payload<AuthResponse>(acknowledge_env);
     bool is_accepted = resp.is_accepted;
 
     if (not is_accepted) {

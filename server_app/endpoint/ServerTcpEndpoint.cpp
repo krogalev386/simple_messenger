@@ -13,6 +13,7 @@
 
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
+#include "MessageProcessing.hpp"
 #include "ThreadManager.hpp"
 #include "defines.hpp"
 
@@ -42,7 +43,7 @@ void ServerTcpEndpoint::sendAcceptNotificaton(bool   is_accepted,
         MessageType::ServiceMessage;
 
     AuthResponse resp{is_accepted, user_id};
-    memcpy(&auth_notification.payload, &resp, sizeof(resp));
+    msg_proc::set_payload<AuthResponse>(auth_notification, resp);
     sendEnvelope(auth_notification, client_socket_id);
 };
 
@@ -94,9 +95,8 @@ std::optional<UserID> ServerTcpEndpoint::authentificateUser(
     MessageType msgType = credentials_envlp.meta_data.header.message_type;
 
     if (msgType == MessageType::ServiceMessage) {
-        UserCredentials credentials{};
-        memcpy(&credentials, &(credentials_envlp.payload),
-               sizeof(UserCredentials));
+        auto credentials =
+            msg_proc::get_payload<UserCredentials>(credentials_envlp);
         LOG("Connection attempt from user %s, %s, socket %d", credentials.email,
             credentials.password, client_socket_id);
 
