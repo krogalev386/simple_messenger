@@ -25,8 +25,8 @@ Envelope create_text_envelope() {
 }
 
 Envelope create_auth_envelope() {
-    Envelope env                      = create_text_envelope();
-    env.meta_data.header.message_type = MessageType::ServiceMessage;
+    Envelope env = create_text_envelope();
+    msg_proc::setMessageType(env, MessageType::ServiceMessage);
     return env;
 }
 
@@ -98,7 +98,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
     client_tcp_point.sendEnvelope(auth_message);
 
     Envelope acknowledge_env = client_tcp_point.receiveEnvelope();
-    if (acknowledge_env.meta_data.header.message_type !=
+    if (msg_proc::getMessageType(acknowledge_env) !=
         MessageType::ServiceMessage) {
         printf("Connection refused, wrong message type, please try again\n");
         return;

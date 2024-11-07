@@ -39,8 +39,7 @@ void ServerTcpEndpoint::sendAcceptNotificaton(bool   is_accepted,
                                               int    client_socket_id,
                                               UserID user_id) {
     Envelope auth_notification{};
-    auth_notification.meta_data.header.message_type =
-        MessageType::ServiceMessage;
+    msg_proc::setMessageType(auth_notification, MessageType::ServiceMessage);
 
     AuthResponse resp{is_accepted, user_id};
     msg_proc::set_payload<AuthResponse>(auth_notification, resp);
@@ -92,7 +91,7 @@ std::optional<UserID> ServerTcpEndpoint::authentificateUser(
     // Authentification:
     LOG("current client_socket_id: %d", client_socket_id);
     Envelope    credentials_envlp = receiveEnvelope(client_socket_id);
-    MessageType msgType = credentials_envlp.meta_data.header.message_type;
+    MessageType msgType           = msg_proc::getMessageType(credentials_envlp);
 
     if (msgType == MessageType::ServiceMessage) {
         auto credentials =

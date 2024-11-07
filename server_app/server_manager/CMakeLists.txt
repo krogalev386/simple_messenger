@@ -8,6 +8,7 @@ target_link_libraries(server_manager_lib
         server_endpoints_lib
         logger_lib_if
         thread_manager_lib
+        message_processor_lib_if
         utilities_lib_if
         psql_manager_lib
 )

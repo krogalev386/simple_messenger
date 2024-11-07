@@ -7,6 +7,7 @@
 
 #include "AuthentificationService.hpp"
 #include "Logger.hpp"
+#include "MessageProcessing.hpp"
 #include "PsqlManager.hpp"
 #include "ServerTcpEndpoint.hpp"
 #include "ThreadManager.hpp"
@@ -46,7 +47,7 @@ void ServerManager::checkMail() {
     if (result) {
         LOG("Received message over UDP: %s", result->payload);
         printf("Received message over UDP: %s\n", result->payload);
-        MessageType msgType = result->meta_data.header.message_type;
+        MessageType msgType = msg_proc::getMessageType(*result);
         if (msgType == MessageType::UserMessage) {
             LOG("User message received");
         }

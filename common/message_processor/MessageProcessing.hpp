@@ -17,4 +17,12 @@ void set_payload(Envelope& env, const T& message) {
     memcpy(&env.payload, &message, sizeof(T));
 };
 
+inline MessageType getMessageType(const Envelope& env) {
+    return env.meta_data.header.message_type;
+};
+
+inline void setMessageType(Envelope& env, MessageType type) {
+    env.meta_data.header.message_type = type;
+};
+
 };  // namespace msg_proc
