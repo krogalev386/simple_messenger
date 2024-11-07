@@ -12,6 +12,32 @@ void UdpEndpointBase::sendEnvelope(const Envelope&   envelope,
     LOG("%ld bytes has been sent over UDP", n_bytes);
 }
 
+void UdpEndpointBase::sendAck(const SocketInfo& receiver_info) {
+    Envelope env{};
+    memset(&env, 0, sizeof(Envelope));
+    env.meta_data.header.message_type = MessageType::AckMessage;
+    int64_t n_bytes = sendto(socket_id, &env, sizeof(Envelope), 0,
+                             const_cast<sockaddr*>(&receiver_info.addr),
+                             receiver_info.addrlen);
+    LOG("%ld bytes has been sent over UDP", n_bytes);
+}
+
+void UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
+                                      const SocketInfo& receiver_info) {
+    bool acknowledge_received = false;
+    while (!acknowledge_received) {
+        sendEnvelope(envelope, receiver_info);
+        for (uint count = 0; count < 10; count++) {
+            auto response = tryReceiveEnvelope(&receiver_info);
+            if ((response) and (response->meta_data.header.message_type ==
+                                MessageType::AckMessage)) {
+                acknowledge_received = true;
+                break;
+            }
+        }
+    }
+}
+
 Envelope UdpEndpointBase::receiveEnvelope(const SocketInfo* sender_info) {
     Envelope env{};
     memset(&env, 0, sizeof(Envelope));

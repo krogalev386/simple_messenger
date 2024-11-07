@@ -11,7 +11,7 @@ typedef uint64_t UserID;
 
 enum DataType : uint8_t { TextMessage, FileMessage };
 
-enum MessageType : uint8_t { UserMessage, ServiceMessage };
+enum MessageType : uint8_t { UserMessage, ServiceMessage, AckMessage };
 
 struct Header {
     size_t      payload_size;
