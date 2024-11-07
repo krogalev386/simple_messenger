@@ -13,10 +13,8 @@ class UdpEndpointBase : public EndpointBase {
    public:
     void     sendEnvelope(const Envelope&   envelope,
                           const SocketInfo& receiver_info);
-    Envelope receiveEnvelope();
-    Envelope receiveEnvelopeFrom(const SocketInfo& sender_info);
+    Envelope receiveEnvelope(const SocketInfo* sender_info = nullptr);
 
-    std::optional<Envelope> tryReceiveEnvelope();
-    std::optional<Envelope> tryReceiveEnvelopeFrom(
-        const SocketInfo& sender_info);
+    std::optional<Envelope> tryReceiveEnvelope(
+        const SocketInfo* sender_info = nullptr);
 };
