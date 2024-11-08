@@ -7,4 +7,5 @@ target_link_libraries(client_app
         msg_itf_lib_if
         client_endpoints_lib
         message_processor_lib_if
+        thread_manager_lib
 )

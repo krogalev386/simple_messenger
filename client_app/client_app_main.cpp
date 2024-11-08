@@ -6,6 +6,7 @@
 #include "ClientTcpEndpoint.hpp"
 #include "ClientUdpEndpoint.hpp"
 #include "MessageProcessing.hpp"
+#include "ThreadManager.hpp"
 #include "defines.hpp"
 
 constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
@@ -69,6 +70,9 @@ UserCredentials user_cred[] = {
 
 void client_interactive_main(size_t port_id, const char* ip_string,
                              int user_num) {
+    // Thread Manager startup
+    ThreadManager::init();
+
     // Connection:
     ClientTcpEndpoint client_tcp_point(port_id);
     ClientUdpEndpoint client_udp_point(11112);
@@ -122,6 +126,8 @@ void client_interactive_main(size_t port_id, const char* ip_string,
         embed_text(env, buffer);
         client_udp_point.sendEnvelope(env, serv_addr);
     }
+
+    ThreadManager::destroy();
 }
 
 int main(int argn, char* argv[]) {

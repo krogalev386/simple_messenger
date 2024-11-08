@@ -9,6 +9,8 @@
 
 typedef uint64_t UserID;
 
+typedef uint32_t Timestamp;
+
 enum DataType : uint8_t { TextMessage, FileMessage };
 
 enum MessageType : uint8_t { UserMessage, ServiceMessage, AckMessage };
@@ -17,6 +19,7 @@ struct Header {
     size_t      payload_size;
     size_t      total_size;
     MessageType message_type;
+    Timestamp   timestamp;
 };
 
 struct EnvelopeMeta {

@@ -25,4 +25,11 @@ inline void setMessageType(Envelope& env, MessageType type) {
     env.meta_data.header.message_type = type;
 };
 
+inline Timestamp getTimeStamp(const Envelope& env) {
+    return env.meta_data.header.timestamp;
+};
+
+inline void setTimeStamp(Envelope& env, Timestamp t_stamp) {
+    env.meta_data.header.timestamp = t_stamp;
+};
 };  // namespace msg_proc

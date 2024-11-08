@@ -14,4 +14,5 @@ target_link_libraries(common_endpoints_lib
         msg_itf_lib_if
         logger_lib_if
         message_processor_lib_if
+        thread_manager_lib
 )
