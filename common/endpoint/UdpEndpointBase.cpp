@@ -47,9 +47,10 @@ void UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
             // Send timestamped envelope
             bool acknowledge_received = false;
 
-            for (uint8_t attempt = 0; (attempt < 10) and (!acknowledge_received);
-                 ++attempt) {
+            for (uint8_t attempt = 0;
+                 (attempt < 10) and (!acknowledge_received); ++attempt) {
                 sendEnvelope(envStamped, receiver_info);
+                LOG("Envelope with timestamp %lu has been sent", tStamp);
                 for (uint8_t count = 0; count < 10; count++) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     {
@@ -60,6 +61,7 @@ void UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
                             (msg_proc::getTimeStamp(*response) == tStamp)) {
                             acknowledge_received = true;
                             this->ackEnvelope    = std::nullopt;
+                            LOG("Transmission succeed.");
                             break;
                         }
                     }
@@ -89,12 +91,13 @@ Envelope UdpEndpointBase::receiveEnvelope(const SocketInfo* sender_info) {
 
     if (msg_proc::getMessageType(env) != MessageType::AckMessage) {
         LOG("%ld bytes of non-ACK message received", n_bytes);
-        if (sender_info != nullptr){
+        if (sender_info != nullptr) {
             // if sender is known - send ACK message back
             sendAck(*sender_info, msg_proc::getTimeStamp(env));
         }
     } else {
-        LOG("ACK message received");
+        LOG("ACK message with timestamp %lu received",
+            msg_proc::getTimeStamp(env));
         std::unique_lock<std::mutex> lock(ackMtx);
         updateAckEnvelope(env);
     }

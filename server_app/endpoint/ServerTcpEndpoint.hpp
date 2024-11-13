@@ -21,6 +21,8 @@ class ServerTcpEndpoint : public TcpEndpointBase {
     size_t numOfConnections() const;
     int    getClientHandle(size_t index);
 
+    const std::vector<ClientInfo>& getConnectedClients() const;
+
     std::optional<UserID> authentificateUser(int client_socket_id);
 
    private:

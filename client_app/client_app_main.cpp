@@ -1,10 +1,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <thread>
 #include <vector>
 
 #include "ClientTcpEndpoint.hpp"
 #include "ClientUdpEndpoint.hpp"
+#include "Logger.hpp"
 #include "MessageProcessing.hpp"
 #include "ThreadManager.hpp"
 #include "defines.hpp"
@@ -116,17 +118,39 @@ void client_interactive_main(size_t port_id, const char* ip_string,
         return;
     }
     printf("Access granted, your user ID is %lu\n", resp.user_id);
-    // Job loop
+
+    // Job loops
     char buffer[buffer_size];
     memset(buffer, 0, sizeof(buffer));
 
-    while (not(strcmp(buffer, "exit") == 0)) {
-        Envelope env = create_text_envelope();
-        write_message(buffer);
-        embed_text(env, buffer);
-        client_udp_point.sendEnvelope(env, serv_addr);
-    }
+    bool isRunning = true;
 
+    // Listening
+    auto listen = [&isRunning, &client_udp_point, &serv_addr]() mutable {
+        while (isRunning) {
+            std::optional<Envelope> result =
+                client_udp_point.tryReceiveEnvelope(&serv_addr);
+        }
+    };
+
+    // Sending
+    auto send = [&isRunning, &client_udp_point, &serv_addr, &buffer]() mutable {
+        while (not(strcmp(buffer, "exit") == 0)) {
+            Envelope env = create_text_envelope();
+            write_message(buffer);
+            embed_text(env, buffer);
+            client_udp_point.sendEnvelopeAck(env, serv_addr);
+        }
+        isRunning = false;
+    };
+
+    // Run concurrent threads
+    std::thread listeing_thrd = std::thread(listen);
+    std::thread sending_thrd  = std::thread(send);
+
+    // Shutdown
+    listeing_thrd.join();
+    sending_thrd.join();
     ThreadManager::destroy();
 }
 

@@ -43,15 +43,28 @@ ServerUdpEndpoint& ServerManager::getUdpEndPoint() { return udpEndpoint; };
 void ServerManager::checkMail() {
     auto& udpEndpoint = getUdpEndPoint();
 
-    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope();
-    if (result) {
-        LOG("Received message over UDP: %s", result->payload);
-        printf("Received message over UDP: %s\n", result->payload);
-        MessageType msgType = msg_proc::getMessageType(*result);
+    auto report_result = [](const Envelope& result) {
+        LOG("Received message over UDP: %s", result.payload);
+        printf("Received message over UDP: %s\n", result.payload);
+        MessageType msgType = msg_proc::getMessageType(result);
         if (msgType == MessageType::UserMessage) {
             LOG("User message received");
         }
+    };
+#if 1
+    for (auto connection : getTcpEndPoint().getConnectedClients()) {
+        std::optional<Envelope> result =
+            udpEndpoint.tryReceiveEnvelope(&connection.socket_info);
+        if (result) {
+            report_result(*result);
+        }
     }
+#else
+    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope();
+    if (result) {
+        report_result(*result);
+    }
+#endif
 };
 
 void ServerManager::runEventLoop() {

@@ -138,3 +138,7 @@ int ServerTcpEndpoint::getClientHandle(size_t index) {
 size_t ServerTcpEndpoint::numOfConnections() const {
     return client_info_storage.size();
 };
+
+const std::vector<ClientInfo>& ServerTcpEndpoint::getConnectedClients() const {
+    return client_info_storage;
+}

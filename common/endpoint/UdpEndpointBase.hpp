@@ -26,7 +26,9 @@ class UdpEndpointBase : public EndpointBase {
                              const SocketInfo& receiver_info);
     Envelope receiveEnvelope(const SocketInfo* sender_info = nullptr);
 
-    void updateAckEnvelope(const Envelope& ackEnv) { *ackEnvelope = ackEnv; };
+    void updateAckEnvelope(const Envelope& ackEnv) {
+        ackEnvelope = std::make_optional<Envelope>(ackEnv);
+    };
     std::optional<Envelope> tryReceiveEnvelope(
         const SocketInfo* sender_info = nullptr);
 };
