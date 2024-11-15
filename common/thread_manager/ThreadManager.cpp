@@ -51,7 +51,7 @@ void ThreadManager::schedule_task(const std::function<void()>& new_task) {
         while (task_queue.is_full()) {
             // let the queue to drain
             task_queue_mtx.unlock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             task_queue_mtx.lock();
         }
         task_queue.push(new_task);

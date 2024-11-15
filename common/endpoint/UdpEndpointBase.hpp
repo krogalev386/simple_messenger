@@ -22,7 +22,7 @@ class UdpEndpointBase : public EndpointBase {
     void     sendEnvelope(const Envelope&   envelope,
                           const SocketInfo& receiver_info);
     void     sendAck(const SocketInfo& receiver_info, Timestamp t_stamp);
-    void     sendEnvelopeAck(const Envelope&   envelope,
+    bool     sendEnvelopeAck(const Envelope&   envelope,
                              const SocketInfo& receiver_info);
     Envelope receiveEnvelope(const SocketInfo* sender_info = nullptr);
 
@@ -30,5 +30,10 @@ class UdpEndpointBase : public EndpointBase {
         ackEnvelope = std::make_optional<Envelope>(ackEnv);
     };
     std::optional<Envelope> tryReceiveEnvelope(
+        const SocketInfo* sender_info = nullptr);
+
+   private:
+    Envelope                receiveAck(const SocketInfo* sender_info = nullptr);
+    std::optional<Envelope> tryReceiveAck(
         const SocketInfo* sender_info = nullptr);
 };

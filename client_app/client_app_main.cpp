@@ -73,7 +73,7 @@ UserCredentials user_cred[] = {
 void client_interactive_main(size_t port_id, const char* ip_string,
                              int user_num) {
     // Thread Manager startup
-    ThreadManager::init();
+    // ThreadManager::init();
 
     // Connection:
     ClientTcpEndpoint client_tcp_point(port_id);
@@ -151,7 +151,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
     // Shutdown
     listeing_thrd.join();
     sending_thrd.join();
-    ThreadManager::destroy();
+    // ThreadManager::destroy();
 }
 
 int main(int argn, char* argv[]) {

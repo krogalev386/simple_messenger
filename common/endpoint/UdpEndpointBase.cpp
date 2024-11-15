@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <cstring>
+#include <mutex>
 #include <thread>
 
 #include "Logger.hpp"
@@ -31,10 +32,11 @@ void UdpEndpointBase::sendAck(const SocketInfo& receiver_info,
     LOG("%ld ACK message has been sent over UDP", n_bytes);
 }
 
-void UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
+bool UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
                                       const SocketInfo& receiver_info) {
+    std::unique_lock<std::mutex> lock(ackMtx);
     // Timestamp envelope before to send
-    timeval curTime{};
+    timeval                      curTime{};
     gettimeofday(&curTime, NULL);
     Timestamp tStamp = (static_cast<uint32_t>(curTime.tv_sec) << 20) |
                        (static_cast<uint32_t>(curTime.tv_usec));
@@ -42,42 +44,21 @@ void UdpEndpointBase::sendEnvelopeAck(const Envelope&   envelope,
     Envelope envStamped = envelope;
     msg_proc::setTimeStamp(envStamped, tStamp);
 
-    ThreadManager::getInstance().schedule_task(
-        [this, envStamped, receiver_info, tStamp]() mutable {
-            // Send timestamped envelope
-            bool acknowledge_received = false;
-
-            for (uint8_t attempt = 0;
-                 (attempt < 10) and (!acknowledge_received); ++attempt) {
-                sendEnvelope(envStamped, receiver_info);
-                LOG("Envelope with timestamp %lu has been sent", tStamp);
-                for (uint8_t count = 0; count < 10; count++) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                    {
-                        std::unique_lock<std::mutex> lock(ackMtx);
-                        auto response = this->ackEnvelope;
-                        // Check if ACK is correct by timestamps comparation
-                        if ((response) and
-                            (msg_proc::getTimeStamp(*response) == tStamp)) {
-                            acknowledge_received = true;
-                            this->ackEnvelope    = std::nullopt;
-                            LOG("Transmission succeed.");
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!acknowledge_received) {
-                printf(
-                    "Message is not received; check network connection and try "
-                    "to send "
-                    "message again.\n");
-                LOG("MESSAGE TRANSMISSION FAILED: NO ACK RECEIVED");
-            }
-        });
+    for (uint8_t i = 0; i < 10; i++) {
+        sendEnvelope(envStamped, receiver_info);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50 * (i + 1)));
+        auto response = tryReceiveAck(&receiver_info);
+        if ((response) and
+            (msg_proc::getMessageType(*response) == MessageType::AckMessage) and
+            (msg_proc::getTimeStamp(*response) == tStamp)) {
+            return true;
+        }
+    }
+    LOG("WRN: Transmission failed.");
+    return false;
 }
 
-Envelope UdpEndpointBase::receiveEnvelope(const SocketInfo* sender_info) {
+Envelope recvEnv(const int socket_id, const SocketInfo* sender_info) {
     Envelope env{};
     memset(&env, 0, sizeof(Envelope));
     int64_t n_bytes = 0;
@@ -88,28 +69,48 @@ Envelope UdpEndpointBase::receiveEnvelope(const SocketInfo* sender_info) {
     } else {
         n_bytes = recv(socket_id, &env, sizeof(Envelope), 0);
     }
+    return env;
+}
 
+Envelope UdpEndpointBase::receiveEnvelope(const SocketInfo* sender_info) {
+    Envelope env = recvEnv(socket_id, sender_info);
     if (msg_proc::getMessageType(env) != MessageType::AckMessage) {
-        LOG("%ld bytes of non-ACK message received", n_bytes);
         if (sender_info != nullptr) {
             // if sender is known - send ACK message back
             sendAck(*sender_info, msg_proc::getTimeStamp(env));
         }
     } else {
-        LOG("ACK message with timestamp %lu received",
-            msg_proc::getTimeStamp(env));
-        std::unique_lock<std::mutex> lock(ackMtx);
-        updateAckEnvelope(env);
+        LOG("ERROR: ACK message catched by non-ACK receive handler!");
     }
-
     return env;
+}
+
+Envelope UdpEndpointBase::receiveAck(const SocketInfo* sender_info) {
+    Envelope env = recvEnv(socket_id, sender_info);
+    if (msg_proc::getMessageType(env) != MessageType::AckMessage) {
+        LOG("ERROR: Non-ACK message catched by ACK receive handler!");
+    }
+    return env;
+}
+
+std::optional<Envelope> UdpEndpointBase::tryReceiveAck(
+    const SocketInfo* sender_info) {
+    const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
+    if (ready_to_read) {
+        return receiveAck(sender_info);
+    }
+    return std::nullopt;
 }
 
 std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope(
     const SocketInfo* sender_info) {
-    const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
-    if (ready_to_read) {
-        return receiveEnvelope(sender_info);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    {
+        std::unique_lock<std::mutex> lock(ackMtx);
+        const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
+        if (ready_to_read) {
+            return receiveEnvelope(sender_info);
+        }
+        return std::nullopt;
     }
-    return std::nullopt;
 }
