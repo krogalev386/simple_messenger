@@ -1,13 +1,12 @@
 FROM alpine:latest
 RUN apk update && \
-    apk add --no-cache clang make cmake && \
-    apk add libpq-dev
+    apk add --no-cache clang make cmake
 WORKDIR /test_bench
 # copy project files from upper level directory
 COPY . .
 RUN rm -rf build/ && mkdir build && \
     cmake -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.cmake -B build . && \
-    cmake --build build -j 4
+    cmake --build build --target client_app -j 4
 
 FROM alpine:latest
 RUN apk update && \

@@ -7,7 +7,7 @@ WORKDIR /test_bench
 COPY . .
 RUN rm -rf build/ && mkdir build && \
     cmake -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.cmake -B build . && \
-    cmake --build build -j 4
+    cmake --build build --target server_app -j 4
 
 FROM alpine:latest
 RUN apk update && \
