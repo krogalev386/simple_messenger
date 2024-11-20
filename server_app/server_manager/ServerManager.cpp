@@ -13,7 +13,7 @@
 #include "ThreadManager.hpp"
 
 ServerManager::ServerManager()
-    : endpoint(11111, false), udpEndpoint(11112, false) {
+    : endpoint(DEFAUILT_TCP_PORT, false), udpEndpoint(DEFAUILT_UDP_PORT, true) {
     AuthentificationService::init();
     PsqlManager::init();
 
@@ -52,11 +52,11 @@ void ServerManager::checkMail() {
         }
     };
 #if 1
-    for (auto connection : getTcpEndPoint().getConnectedClients()) {
-        std::optional<Envelope> result =
-            udpEndpoint.tryReceiveEnvelope(&connection.socket_info);
-        if (result) {
-            report_result(*result);
+    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope(nullptr);
+    if (result) {
+        report_result(*result);
+        for (auto connection : getTcpEndPoint().getConnectedClients()) {
+            udpEndpoint.sendEnvelope(*result, connection.socket_info);
         }
     }
 #else

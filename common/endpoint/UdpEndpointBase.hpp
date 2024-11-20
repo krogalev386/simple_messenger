@@ -1,39 +1,51 @@
 #pragma once
 
+#include <CircularBuffer.hpp>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <thread>
+#include <utility>
 
 #include "EndpointBase.hpp"
 #include "defines.hpp"
 
+struct AddressedEnvelope {
+    SocketInfo sock_info;
+    Envelope   env;
+};
+
 class UdpEndpointBase : public EndpointBase {
    private:
-    std::optional<Envelope> ackEnvelope;
+    static constexpr uint8_t messageQueueSize = 4;
+
+    // std::optional<Envelope> ackEnvelope;
+
+    CircularBuffer<Envelope, messageQueueSize>          inQueue;
+    CircularBuffer<AddressedEnvelope, messageQueueSize> outQueue;
+    bool                                                isRunning;
+    std::unique_ptr<std::thread>                        sender_thread;
+    std::unique_ptr<std::thread>                        listener_thread;
 
    public:
     std::mutex ackMtx;
 
    public:
-    UdpEndpointBase(int port, int protocol, bool blocking = true)
-        : EndpointBase(port, SOCK_DGRAM, protocol, blocking),
-          ackEnvelope(std::nullopt){};
+    UdpEndpointBase(int port, int protocol, bool blocking = true);
+    ~UdpEndpointBase();
 
    public:
-    void     sendEnvelope(const Envelope&   envelope,
-                          const SocketInfo& receiver_info);
-    void     sendAck(const SocketInfo& receiver_info, Timestamp t_stamp);
-    bool     sendEnvelopeAck(const Envelope&   envelope,
-                             const SocketInfo& receiver_info);
-    Envelope receiveEnvelope(const SocketInfo* sender_info = nullptr);
+    void sendEnvelope(const Envelope&   envelope,
+                      const SocketInfo& receiver_info);
+    // Envelope receiveEnvelope(const SocketInfo* sender_info = nullptr);
 
-    void updateAckEnvelope(const Envelope& ackEnv) {
-        ackEnvelope = std::make_optional<Envelope>(ackEnv);
-    };
     std::optional<Envelope> tryReceiveEnvelope(
         const SocketInfo* sender_info = nullptr);
 
    private:
-    Envelope                receiveAck(const SocketInfo* sender_info = nullptr);
-    std::optional<Envelope> tryReceiveAck(
-        const SocketInfo* sender_info = nullptr);
+    void     sendEnvFromOutQueue();
+    void     storeEnvToInQueue(const Envelope& env);
+    Envelope recvEnv(const SocketInfo* sender_info);
+    void     repeatingSend();
+    void     repeatingListen();
 };

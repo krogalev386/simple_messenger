@@ -45,8 +45,8 @@ void write_message(char* text_buffer) {
 #if 0
 void client_main()
 {
-    ClientTcpEndpoint client_tcp_point(11111);
-    client_tcp_point.connectTo("127.0.0.1", 11111);
+    ClientTcpEndpoint client_tcp_point(DEFAUILT_TCP_PORT);
+    client_tcp_point.connectTo("127.0.0.1", DEFAUILT_TCP_PORT);
 
     const char* greetings = "Hello,adfasdfadfaszxcvd dear serkver!";
     
@@ -72,33 +72,20 @@ UserCredentials user_cred[] = {
 
 void client_interactive_main(size_t port_id, const char* ip_string,
                              int user_num) {
-    // Thread Manager startup
-    // ThreadManager::init();
-
     // Connection:
     ClientTcpEndpoint client_tcp_point(port_id);
-    ClientUdpEndpoint client_udp_point(11112);
+    ClientUdpEndpoint client_udp_point(DEFAUILT_UDP_PORT);
 
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port   = htons(11112);
+    server_addr.sin_port   = htons(DEFAUILT_UDP_PORT);
     inet_pton(AF_INET, ip_string, &server_addr.sin_addr);
 
     SocketInfo serv_addr{*reinterpret_cast<sockaddr*>(&server_addr),
                          sizeof(server_addr)};
     client_tcp_point.connectTo(ip_string, port_id);
 
-    // Authentification:
-    /*UserCredentials credentials{};
-
-    printf("Enter your credentials\n");
-    printf("Enter your email:\n");
-    scanf("%s", credentials.email);
-    printf("Enter your password:\n");
-    scanf("%s", credentials.password);*/
-
     Envelope auth_message = create_auth_envelope();
-    // memcpy(&auth_message.payload, &credentials, sizeof(UserCredentials));
     msg_proc::set_payload<UserCredentials>(auth_message, user_cred[user_num]);
 
     client_tcp_point.sendEnvelope(auth_message);
@@ -121,15 +108,22 @@ void client_interactive_main(size_t port_id, const char* ip_string,
 
     // Job loops
     char buffer[buffer_size];
+    char resp_buffer[buffer_size];
     memset(buffer, 0, sizeof(buffer));
+    memset(resp_buffer, 0, sizeof(resp_buffer));
 
     bool isRunning = true;
 
     // Listening
-    auto listen = [&isRunning, &client_udp_point, &serv_addr]() mutable {
+    auto listen = [&isRunning, &client_udp_point, &serv_addr,
+                   resp_buffer]() mutable {
         while (isRunning) {
             std::optional<Envelope> result =
-                client_udp_point.tryReceiveEnvelope(&serv_addr);
+                client_udp_point.tryReceiveEnvelope(nullptr);
+            if (result) {
+                memcpy(resp_buffer, &(result->payload), sizeof(resp_buffer));
+                printf("Ping from server received: %s\n", resp_buffer);
+            }
         }
     };
 
@@ -139,7 +133,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
             Envelope env = create_text_envelope();
             write_message(buffer);
             embed_text(env, buffer);
-            client_udp_point.sendEnvelopeAck(env, serv_addr);
+            client_udp_point.sendEnvelope(env, serv_addr);
         }
         isRunning = false;
     };
@@ -151,14 +145,14 @@ void client_interactive_main(size_t port_id, const char* ip_string,
     // Shutdown
     listeing_thrd.join();
     sending_thrd.join();
-    // ThreadManager::destroy();
 }
 
 int main(int argn, char* argv[]) {
     if (argn == 2) {
-        client_interactive_main(11111, "127.0.0.1", std::atoi(argv[1]));
+        client_interactive_main(DEFAUILT_TCP_PORT, "127.0.0.1",
+                                std::atoi(argv[1]));
     } else if (argn == 3) {
-        client_interactive_main(11111, argv[1], std::atoi(argv[2]));
+        client_interactive_main(DEFAUILT_TCP_PORT, argv[1], std::atoi(argv[2]));
     } else {
         printf("Too many args; the client has not started\n");
     }

@@ -7,12 +7,13 @@
 #include <cstdint>
 #include <vector>
 
-typedef uint64_t UserID;
+#define DEFAUILT_TCP_PORT 11111
+#define DEFAUILT_UDP_PORT 11112
 
+typedef uint64_t UserID;
 typedef uint32_t Timestamp;
 
 enum DataType : uint8_t { TextMessage, FileMessage };
-
 enum MessageType : uint8_t { UserMessage, ServiceMessage, AckMessage };
 
 struct Header {
@@ -46,7 +47,8 @@ struct UserCredentials {
 
 struct SocketInfo {
     sockaddr  addr;
-    socklen_t addrlen;
+    socklen_t addrlen = sizeof(sockaddr);  // must be defined by size of
+                                           // sockaddr by default
 };
 
 struct ClientInfo {
