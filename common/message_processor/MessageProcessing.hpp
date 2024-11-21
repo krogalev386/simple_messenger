@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <vector>
 
 #include "defines.hpp"
@@ -32,4 +33,11 @@ inline Timestamp getTimeStamp(const Envelope& env) {
 inline void setTimeStamp(Envelope& env, Timestamp t_stamp) {
     env.meta_data.header.timestamp = t_stamp;
 };
+
+inline Timestamp createTimeStamp() {
+    using namespace std::chrono;
+    const auto now_tse    = system_clock::now().time_since_epoch();
+    Timestamp  now_tse_us = duration_cast<microseconds>(now_tse).count();
+    return now_tse_us;
+}
 };  // namespace msg_proc

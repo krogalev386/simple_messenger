@@ -52,7 +52,7 @@ void ServerManager::checkMail() {
         }
     };
 #if 1
-    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope(nullptr);
+    std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope();
     if (result) {
         report_result(*result);
         for (auto connection : getTcpEndPoint().getConnectedClients()) {

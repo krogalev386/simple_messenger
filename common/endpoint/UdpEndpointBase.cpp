@@ -28,48 +28,92 @@ UdpEndpointBase::~UdpEndpointBase() {
 
 void UdpEndpointBase::sendEnvelope(const Envelope&   envelope,
                                    const SocketInfo& receiver_info) {
-    AddressedEnvelope addrEnv{receiver_info, envelope};
-    bool              success = outQueue.push(addrEnv);
+    Envelope stampedEnv = envelope;
+    msg_proc::setTimeStamp(stampedEnv, msg_proc::createTimeStamp());
+    AddressedEnvelope addrEnv{receiver_info, stampedEnv};
+
+    bool success = outQueue.push(addrEnv);
     if (success) {
         LOG("Outcoming message enqueued for departure");
     }
 }
 
-Envelope UdpEndpointBase::recvEnv(const SocketInfo* sender_info) {
+AddressedEnvelope UdpEndpointBase::recvDataGram() {
     Envelope env{};
     memset(&env, 0, sizeof(Envelope));
-    int64_t n_bytes = 0;
-    if (sender_info != nullptr) {
-        n_bytes = recvfrom(socket_id, &env, sizeof(Envelope), 0,
-                           const_cast<sockaddr*>(&(sender_info->addr)),
-                           const_cast<socklen_t*>(&(sender_info->addrlen)));
-    } else {
-        n_bytes = recv(socket_id, &env, sizeof(Envelope), 0);
-    }
-    LOG("%ld bytes received and enqueued", n_bytes);
-    return env;
+    SocketInfo sender_info;
+    memset(&sender_info.addr, 0, sizeof(sockaddr));
+
+    // sender_info should be filled by sender address after the reception
+    LOG("CHECKPOINT %lu", sender_info.addrlen);
+    int64_t n_bytes = recvfrom(socket_id, &env, sizeof(Envelope), 0,
+                               &(sender_info.addr), &(sender_info.addrlen));
+    LOG("%ld bytes received from and enqueued", n_bytes);
+    AddressedEnvelope aEnv{sender_info, env};
+    return aEnv;
 }
 
-void UdpEndpointBase::storeEnvToInQueue(const Envelope& env) {
-    bool success = inQueue.push(env);
-    if (not success) {
-        LOG("ERROR: incoming message queue overflowed, message dropped");
+void UdpEndpointBase::storeEnvToInQueue(const AddressedEnvelope& aEnv) {
+    while (not inQueue.push(aEnv)) {
+        inQueue.pop();
+        LOG("WRN: incoming message queue overflow, earliest message is "
+            "dropped");
+    }
+}
+
+void UdpEndpointBase::storeTstampToAckQueue(const Timestamp& tStamp) {
+    ExpiringAck eAck;
+    eAck.tStamp = tStamp;
+    while (not ackQueue.push(eAck)) {
+        ackQueue.pop();
+        LOG("WRN: ACK queue overflow, earliest ACK is dropped");
+    }
+}
+
+void UdpEndpointBase::sendDataGram(const AddressedEnvelope& aEnv) {
+    int64_t n_bytes = sendto(socket_id, &aEnv.env, sizeof(Envelope), 0,
+                             const_cast<sockaddr*>(&aEnv.sock_info.addr),
+                             aEnv.sock_info.addrlen);
+    LOG("%ld bytes has been sent over UDP", n_bytes);
+    if (n_bytes < 0) {
+        perror("send failure");
     }
 }
 
 void UdpEndpointBase::sendEnvFromOutQueue() {
     auto addrEnvOpt = outQueue.pop();
-    if (addrEnvOpt) {
-        Envelope   envelope      = addrEnvOpt->env;
-        SocketInfo receiver_info = addrEnvOpt->sock_info;
-        int64_t    n_bytes = sendto(socket_id, &envelope, sizeof(Envelope), 0,
-                                    const_cast<sockaddr*>(&receiver_info.addr),
-                                    receiver_info.addrlen);
-        LOG("%ld bytes has been sent over UDP", n_bytes);
-        if (n_bytes < 0) {
-            perror("send failure");
+    if (not addrEnvOpt) {
+        return;
+    }
+
+    Timestamp tStamp = msg_proc::getTimeStamp(addrEnvOpt->env);
+
+    for (uint8_t attempt = 0; attempt < 5; attempt++) {
+        sendDataGram(*addrEnvOpt);
+        // waiting for ACK
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(100 * (attempt + 1)));
+        if (checkAckQueue(tStamp)) {
+            return;
         }
     }
+}
+
+bool UdpEndpointBase::checkAckQueue(const Timestamp& tStamp) {
+    auto pendingAck = ackQueue.pop();
+    if (not pendingAck) {
+        return false;
+    }
+    LOG("pendingAck->tStamp: %lu, tStamp: %lu", pendingAck->tStamp, tStamp);
+    if (pendingAck->tStamp == tStamp) {
+        LOG("ACK received!");
+        return true;
+    }
+    pendingAck->counter--;
+    if (pendingAck->counter > 0) {
+        ackQueue.push(*pendingAck);
+    }
+    return false;
 }
 
 void UdpEndpointBase::repeatingSend() {
@@ -79,25 +123,36 @@ void UdpEndpointBase::repeatingSend() {
     }
 }
 
+void UdpEndpointBase::dispatchIncomingEnv(const AddressedEnvelope& aEnv) {
+    if (msg_proc::getMessageType(aEnv.env) == MessageType::AckMessage) {
+        storeTstampToAckQueue(msg_proc::getTimeStamp(aEnv.env));
+    } else {
+        storeEnvToInQueue(aEnv);
+    }
+}
+
 void UdpEndpointBase::repeatingListen() {
     while (isRunning) {
         const auto [ready_to_read, err_or_closed] = pollSocket(socket_id);
         if (ready_to_read) {
-            Envelope env = recvEnv(nullptr);
-            storeEnvToInQueue(env);
+            auto env = recvDataGram();
+            dispatchIncomingEnv(env);
         }
     }
 }
 
-std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope(
-    const SocketInfo* sender_info) {
-    if (sender_info != nullptr) {
-        LOG("WARNING: functionality currently not supported, 'sender_info' "
-            "will be ignored");
+std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope() {
+    auto aEnv = inQueue.pop();
+    if (not aEnv) {
+        return std::nullopt;
     }
-    auto env = inQueue.pop();
-    if (env) {
-        return env;
-    }
-    return std::nullopt;
+    // Send ACK notification
+    Envelope ackEnv{};
+    msg_proc::setMessageType(ackEnv, MessageType::AckMessage);
+    msg_proc::setTimeStamp(ackEnv, msg_proc::getTimeStamp(aEnv->env));
+
+    AddressedEnvelope ackNotification{aEnv->sock_info, ackEnv};
+    sendDataGram(ackNotification);
+
+    return aEnv->env;
 }

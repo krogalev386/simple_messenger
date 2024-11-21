@@ -119,7 +119,7 @@ void client_interactive_main(size_t port_id, const char* ip_string,
                    resp_buffer]() mutable {
         while (isRunning) {
             std::optional<Envelope> result =
-                client_udp_point.tryReceiveEnvelope(nullptr);
+                client_udp_point.tryReceiveEnvelope();
             if (result) {
                 memcpy(resp_buffer, &(result->payload), sizeof(resp_buffer));
                 printf("Ping from server received: %s\n", resp_buffer);
