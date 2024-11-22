@@ -26,5 +26,12 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt install -y postgresql && \
     apt install -y libpq-dev
 
+# Install basic text editor
+RUN apt install -y nano
+
+# Set work directory
 WORKDIR /workdir/messenger
+
+# Allow git to do manipulations inside the container
+RUN git config --global --add safe.directory /workdir/messenger
 ENTRYPOINT /bin/bash

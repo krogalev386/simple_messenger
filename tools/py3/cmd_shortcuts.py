@@ -4,7 +4,9 @@ from constants import *
 
 LIST_OF_MOUNTS_FOR_DEV = [
     f'{PROJECT_ROOT_DIR_HOST}:{PROJECT_ROOT_DIR_CONT}',
-    f'{DOCKER_SOCK}:{DOCKER_SOCK}'
+    f'{DOCKER_SOCK}:{DOCKER_SOCK}',
+    f'{USER_HOST_GIT_CONFIG}:{DOCKER_GIT_CONFIG}',
+    f'{HOST_SSH_AUTH_SOCK}:{DOCKER_SSH_AUTH_SOCK}',
 ]
 
 
@@ -21,7 +23,7 @@ def run_dev_image_cmd() -> str:
     return ' '.join(cmd_words)
 
 def build_dev_image_cmd() -> str:
-    return ' '.join(['docker', 'build', '-t'] + DEV_IMAGE_NAME + ['.'])
+    return ' '.join(['docker', 'build', '-t'] + DEV_IMAGE_NAME + ['--ssh','default','.'])
 
 def rm_dev_image_cmd() -> str:
     return ' '.join(['docker', 'image', 'rm'] + DEV_IMAGE_NAME)
