@@ -40,6 +40,16 @@ ServerTcpEndpoint& ServerManager::getTcpEndPoint() { return endpoint; };
 
 ServerUdpEndpoint& ServerManager::getUdpEndPoint() { return udpEndpoint; };
 
+std::optional<ClientInfo> ServerManager::findOnlineClient(
+    const UserID& user_id) {
+    for (auto connection : getTcpEndPoint().getConnectedClients()) {
+        if (connection.user_id == user_id) {
+            return connection;
+        }
+    }
+    return std::nullopt;
+}
+
 void ServerManager::checkMail() {
     auto& udpEndpoint = getUdpEndPoint();
 
@@ -55,8 +65,12 @@ void ServerManager::checkMail() {
     std::optional<Envelope> result = udpEndpoint.tryReceiveEnvelope();
     if (result) {
         report_result(*result);
-        for (auto connection : getTcpEndPoint().getConnectedClients()) {
-            udpEndpoint.sendEnvelope(*result, connection.socket_info);
+        UserID rec_id   = msg_proc::getRecepientID(*result);
+        auto   rec_info = findOnlineClient(rec_id);
+        if (rec_info) {
+            udpEndpoint.sendEnvelope(*result, rec_info->socket_info);
+        } else {
+            LOG("Message transmission failed: recepient is offline");
         }
     }
 #else

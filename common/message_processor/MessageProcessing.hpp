@@ -39,5 +39,13 @@ inline Timestamp createTimeStamp() {
     const auto now_tse    = system_clock::now().time_since_epoch();
     Timestamp  now_tse_us = duration_cast<microseconds>(now_tse).count();
     return now_tse_us;
-}
+};
+
+inline UserID getSenderID(const Envelope& env) {
+    return env.meta_data.sender_id;
+};
+
+inline UserID getRecepientID(const Envelope& env) {
+    return env.meta_data.recipient_id;
+};
 };  // namespace msg_proc

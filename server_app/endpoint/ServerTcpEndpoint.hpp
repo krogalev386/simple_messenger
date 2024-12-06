@@ -20,7 +20,7 @@ class ServerTcpEndpoint : public TcpEndpointBase {
     int    acceptConnection();
     void   authentifyClient(ClientInfo&, int);
     size_t numOfConnections() const;
-    int    getClientHandle(size_t);
+    UserID getClientUserID(size_t);
 
     const std::vector<ClientInfo>& getConnectedClients() const;
 

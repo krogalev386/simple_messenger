@@ -60,7 +60,7 @@ void ServerTcpEndpoint::authentifyClient(ClientInfo& client_info, int sock_id) {
     }
 
     // Log in
-    client_info.handle = sock_id;
+    client_info.user_id = user_id.value();
     {
         // protect client_info_storage integrity
         std::unique_lock<std::mutex> lock(cis_mutex);
@@ -101,8 +101,8 @@ std::optional<int> ServerTcpEndpoint::tryAcceptConnection() {
     return std::nullopt;
 };
 
-int ServerTcpEndpoint::getClientHandle(size_t index) {
-    return client_info_storage[index].handle;
+UserID ServerTcpEndpoint::getClientUserID(size_t index) {
+    return client_info_storage[index].user_id;
 };
 
 size_t ServerTcpEndpoint::numOfConnections() const {

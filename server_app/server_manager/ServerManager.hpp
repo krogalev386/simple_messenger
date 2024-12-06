@@ -11,6 +11,9 @@ class ServerManager : public StaticCrtpSingleton<ServerManager> {
     ServerManager();
     ~ServerManager();
 
+   private:
+    std::optional<ClientInfo> findOnlineClient(const UserID&);
+
    public:
     ServerTcpEndpoint& getTcpEndPoint();
     ServerUdpEndpoint& getUdpEndPoint();

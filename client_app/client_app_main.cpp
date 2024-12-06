@@ -13,22 +13,22 @@
 
 constexpr size_t buffer_size = Envelope::size - sizeof(EnvelopeMeta);
 
-Envelope create_text_envelope() {
+Envelope create_text_envelope(UserID sender_id, UserID recepient_id) {
     Envelope env = {
         .meta_data = {
                       .header       = {.payload_size = 234,
                              .total_size   = 400,
                              .message_type = MessageType::UserMessage},
                       .type         = DataType::TextMessage,
-                      .sender_id    = 4,
-                      .recipient_id = 2,
+                      .sender_id    = sender_id,
+                      .recipient_id = recepient_id,
                       }
     };
     return env;
 }
 
 Envelope create_auth_envelope() {
-    Envelope env = create_text_envelope();
+    Envelope env = create_text_envelope(0, 0);
     msg_proc::setMessageType(env, MessageType::ServiceMessage);
     return env;
 }
@@ -50,7 +50,7 @@ void client_main()
 
     const char* greetings = "Hello,adfasdfadfaszxcvd dear serkver!";
     
-    Envelope env = create_text_envelope();
+    Envelope env = create_text_envelope(0,0);
 
     memset(&env.payload, 0, buffer_size);
     memcpy(&env.payload, greetings, strlen(greetings));
@@ -105,10 +105,10 @@ void client_interactive_main(size_t port_id, const char* ip_string,
         return;
     }
     printf("Access granted, your user ID is %lu\n", resp.user_id);
-
+    UserID my_id = resp.user_id;
     // Job loops
-    char buffer[buffer_size];
-    char resp_buffer[buffer_size];
+    char   buffer[buffer_size];
+    char   resp_buffer[buffer_size];
     memset(buffer, 0, sizeof(buffer));
     memset(resp_buffer, 0, sizeof(resp_buffer));
 
@@ -128,9 +128,14 @@ void client_interactive_main(size_t port_id, const char* ip_string,
     };
 
     // Sending
-    auto send = [&isRunning, &client_udp_point, &serv_addr, &buffer]() mutable {
+    auto send = [&isRunning, &client_udp_point, &serv_addr, &buffer,
+                 &my_id]() mutable {
+        UserID recepient_id = 0;
+        printf("Who are you going to send to?\n");
+        scanf("%lu", &recepient_id);
+        printf("Recepient ID: %lu\n", recepient_id);
         while (not(strcmp(buffer, "exit") == 0)) {
-            Envelope env = create_text_envelope();
+            Envelope env = create_text_envelope(my_id, recepient_id);
             write_message(buffer);
             embed_text(env, buffer);
             client_udp_point.sendEnvelope(env, serv_addr);

@@ -52,7 +52,7 @@ struct SocketInfo {
 };
 
 struct ClientInfo {
-    int        handle;
+    UserID     user_id;
     SocketInfo socket_info;
 };
 
