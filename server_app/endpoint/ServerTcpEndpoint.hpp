@@ -18,16 +18,14 @@ class ServerTcpEndpoint : public TcpEndpointBase {
 
     void   listenConnections();
     int    acceptConnection();
+    void   authentifyClient(ClientInfo&, int);
     size_t numOfConnections() const;
-    int    getClientHandle(size_t index);
+    int    getClientHandle(size_t);
 
     const std::vector<ClientInfo>& getConnectedClients() const;
 
-    std::optional<UserID> authentificateUser(int client_socket_id);
-
    private:
-    void sendAcceptNotificaton(bool is_accepted, int client_socket_id,
-                               UserID user_id);
+    void sendAcceptNotificaton(int, std::optional<UserID>);
 
    public:
     std::vector<ClientInfo> client_info_storage;

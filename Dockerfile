@@ -13,6 +13,7 @@ RUN apt install -y clang && \
     apt install -y make && \
     apt install -y cmake && \
     apt install -y clang-tidy && \
+    apt install -y clang-format && \
     apt install -y g++
 
 # Install git
@@ -23,7 +24,7 @@ RUN apt install -y python3-doit
 
 # Install data base server
 RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y postgresql && \
+    apt install -y postgresql-14 && \
     apt install -y libpq-dev
 
 # Install basic text editor

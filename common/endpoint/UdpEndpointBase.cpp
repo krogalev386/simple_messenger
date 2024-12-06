@@ -45,7 +45,6 @@ AddressedEnvelope UdpEndpointBase::recvDataGram() {
     memset(&sender_info.addr, 0, sizeof(sockaddr));
 
     // sender_info should be filled by sender address after the reception
-    LOG("CHECKPOINT %lu", sender_info.addrlen);
     int64_t n_bytes = recvfrom(socket_id, &env, sizeof(Envelope), 0,
                                &(sender_info.addr), &(sender_info.addrlen));
     LOG("%ld bytes received from and enqueued", n_bytes);
@@ -146,6 +145,7 @@ std::optional<Envelope> UdpEndpointBase::tryReceiveEnvelope() {
     if (not aEnv) {
         return std::nullopt;
     }
+    LOG("message retrieved from incoming messages queue");
     // Send ACK notification
     Envelope ackEnv{};
     msg_proc::setMessageType(ackEnv, MessageType::AckMessage);

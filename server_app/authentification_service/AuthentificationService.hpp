@@ -15,8 +15,11 @@ class AuthentificationService
     AuthentificationService();
     ~AuthentificationService() = default;
 
-   public:
+   private:
     static std::optional<UserID> checkIfRegistered(const UserCredentials&);
+
+   public:
+    static std::optional<UserID> handleAuthReq(const Envelope&);
 
     // private:
     //  std::vector<std::pair<UserID, UserCredentials>> registered_users;

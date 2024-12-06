@@ -22,8 +22,9 @@ def run_dev_image_cmd() -> str:
     cmd_words = DOCKER_RUN_CMD + args_list + DEV_IMAGE_NAME
     return ' '.join(cmd_words)
 
-def build_dev_image_cmd() -> str:
-    return ' '.join(['docker', 'build', '-t'] + DEV_IMAGE_NAME + ['--ssh','default','.'])
+def build_dev_image_cmd(fast: bool) -> str:
+    cache_flag = [] if fast is True else ['--no-cache']
+    return ' '.join(['docker', 'build'] + cache_flag + ['-t'] + DEV_IMAGE_NAME + ['--ssh','default','.'])
 
 def rm_dev_image_cmd() -> str:
     return ' '.join(['docker', 'image', 'rm'] + DEV_IMAGE_NAME)
@@ -32,8 +33,8 @@ def run_dev_image() -> None:
     cmd = run_dev_image_cmd()
     os.system(f'{cmd}')
 
-def build_dev_image() -> None:
-    cmd = build_dev_image_cmd()
+def build_dev_image(fast: bool) -> None:
+    cmd = build_dev_image_cmd(fast)
     os.system(f'{cmd}')
 
 def rm_dev_image() -> None:

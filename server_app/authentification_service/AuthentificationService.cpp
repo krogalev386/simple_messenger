@@ -4,6 +4,8 @@
 #include <cstring>
 #include <optional>
 
+#include "Logger.hpp"
+#include "MessageProcessing.hpp"
 #include "PsqlManager.hpp"
 #include "defines.hpp"
 
@@ -22,3 +24,32 @@ std::optional<UserID> AuthentificationService::checkIfRegistered(
     auto user_id = PsqlManager::getInstance().findUserByCreds(considered_cred);
     return user_id;
 }
+
+std::optional<UserID> AuthentificationService::handleAuthReq(
+    const Envelope& authReqEnv) {
+    // Authentification:
+    MessageType msgType = msg_proc::getMessageType(authReqEnv);
+
+    if (msgType == MessageType::ServiceMessage) {
+        auto credentials = msg_proc::get_payload<UserCredentials>(authReqEnv);
+        LOG("Connection attempt from user %s, %s", credentials.email,
+            credentials.password);
+
+        std::optional<UserID> user_id = checkIfRegistered(credentials);
+
+        if (not user_id) {
+            const char* error_msg =
+                "Error: authentification failed, no registered users found, "
+                "connection closed";
+            LOG(error_msg);
+            perror(error_msg);
+        }
+        return user_id;
+    }
+    const char* error_msg =
+        "Error: authentification failed, message of wrong type has been "
+        "received, connection closed";
+    LOG(error_msg);
+    perror(error_msg);
+    return std::nullopt;
+};

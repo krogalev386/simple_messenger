@@ -35,15 +35,40 @@ void ServerTcpEndpoint::listenConnections() {
     }
 };
 
-void ServerTcpEndpoint::sendAcceptNotificaton(bool   is_accepted,
-                                              int    client_socket_id,
-                                              UserID user_id) {
+void ServerTcpEndpoint::sendAcceptNotificaton(
+    int client_socket_id, std::optional<UserID> user_id_opt) {
     Envelope auth_notification{};
     msg_proc::setMessageType(auth_notification, MessageType::ServiceMessage);
-
-    AuthResponse resp{is_accepted, user_id};
+    UserID       u_id        = user_id_opt ? user_id_opt.value() : 0;
+    bool         is_accepted = static_cast<bool>(user_id_opt);
+    AuthResponse resp{is_accepted, u_id};
     msg_proc::set_payload<AuthResponse>(auth_notification, resp);
     sendEnvelope(auth_notification, client_socket_id);
+};
+
+void ServerTcpEndpoint::authentifyClient(ClientInfo& client_info, int sock_id) {
+    // Authentification:
+    Envelope authReqEnv = receiveEnvelope(sock_id);
+    auto     user_id =
+        AuthentificationService::getInstance().handleAuthReq(authReqEnv);
+
+    sendAcceptNotificaton(sock_id, user_id);
+
+    if (not user_id) {
+        close(sock_id);
+        return;
+    }
+
+    // Log in
+    client_info.handle = sock_id;
+    {
+        // protect client_info_storage integrity
+        std::unique_lock<std::mutex> lock(cis_mutex);
+        client_info_storage.push_back(client_info);
+        printf("Client fd %d is successfully registered\n", sock_id);
+    }
+    close(sock_id);
+    printf("Connection with client_id %d closed.", sock_id);
 };
 
 int ServerTcpEndpoint::acceptConnection() {
@@ -63,66 +88,9 @@ int ServerTcpEndpoint::acceptConnection() {
 
     ThreadManager::getInstance().schedule_task(
         [this, new_client, client_socket_id]() mutable {
-            // Authentification:
-            auto user_id = authentificateUser(client_socket_id);
-            if (not user_id) {
-                sendAcceptNotificaton(false, client_socket_id, 0);
-                close(client_socket_id);
-                return;
-            }
-
-            sendAcceptNotificaton(true, client_socket_id, user_id.value());
-
-            // Log in
-            new_client.handle = client_socket_id;
-            {
-                // protect client_info_storage integrity
-                std::unique_lock<std::mutex> lock(cis_mutex);
-                client_info_storage.push_back(new_client);
-                printf("Client fd %d is successfully registered\n",
-                       client_socket_id);
-            }
-            close(client_socket_id);
-            printf("Connection with client_id %d closed.", client_socket_id);
+            authentifyClient(new_client, client_socket_id);
         });
     return client_socket_id;
-};
-
-std::optional<UserID> ServerTcpEndpoint::authentificateUser(
-    int client_socket_id) {
-    // Authentification:
-    LOG("current client_socket_id: %d", client_socket_id);
-    Envelope    credentials_envlp = receiveEnvelope(client_socket_id);
-    MessageType msgType           = msg_proc::getMessageType(credentials_envlp);
-
-    if (msgType == MessageType::ServiceMessage) {
-        auto credentials =
-            msg_proc::get_payload<UserCredentials>(credentials_envlp);
-        LOG("Connection attempt from user %s, %s, socket %d", credentials.email,
-            credentials.password, client_socket_id);
-
-        std::optional<UserID> user_id =
-            AuthentificationService::getInstance().checkIfRegistered(
-                credentials);
-
-        if (not user_id) {
-            const char* error_msg =
-                "Error: authentification failed, no registered users found, "
-                "connection closed";
-            LOG(error_msg);
-            perror(error_msg);
-        }
-        return user_id;
-    }
-    if (msgType == MessageType::UserMessage) {
-        const char* error_msg =
-            "Error: authentification failed, message of wrong type has been "
-            "received, connection closed";
-        LOG(error_msg);
-        perror(error_msg);
-        return std::nullopt;
-    }
-    return std::nullopt;
 };
 
 std::optional<int> ServerTcpEndpoint::tryAcceptConnection() {

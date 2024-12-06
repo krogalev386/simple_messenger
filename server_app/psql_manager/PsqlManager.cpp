@@ -11,6 +11,7 @@ bool PsqlManager::tryConnect(const char* username, const char* password,
         "dbname=" + std::string("postgres") + " user=" + std::string(username) +
         " password=" + std::string(password) +
         " hostaddr=" + std::string(hostaddr) + " port=" + std::string(port);
+    LOG("Attempt to connect to database...");
     printf("%s\n", connstr.data());
     pg_connection = PQconnectdb(connstr.data());
 
@@ -37,6 +38,7 @@ bool PsqlManager::createUsersTableIfNotExist() {
         "email VARCHAR(255) NOT NULL UNIQUE)";
     // Execute the CREATE TABLE query
     pg_result = PQexec(pg_connection, create_table_sql);
+    LOG("Attempt to create new table...");
 
     if (PQresultStatus(pg_result) != PGRES_COMMAND_OK) {
         fprintf(stderr, "Error creating table: %s\n",
