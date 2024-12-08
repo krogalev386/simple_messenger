@@ -9,6 +9,13 @@ POSTGRES_CONTAINER_NANE = 'postgres_database'
 POSTGRES_ADMIN_PASS = 'admin'
 POSTGRES_IPADDR = '11.0.0.3'
 
+# Build spec settings
+ARTIFACTS_DIR = './out'
+BUILD_DIR = './build'
+CMAKE_TOOLCHAIN_FILE = 'CMakeToolchain.cmake'
+CLANG_CHECK = 1
+BUILD_THREAD_NUM = 4
+
 # Dev env containter settings
 PROJECT_ROOT_DIR_HOST = '.'
 PROJECT_ROOT_DIR_CONT = '/workdir/messenger'

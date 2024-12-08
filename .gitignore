@@ -33,6 +33,7 @@
 
 # Artifacts
 build/*
+out/*
 
 # doit db
 .doit.db

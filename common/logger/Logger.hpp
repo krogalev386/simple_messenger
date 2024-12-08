@@ -14,7 +14,7 @@ class Logger : public StaticCrtpSingleton<Logger> {
     friend class StaticCrtpSingleton<Logger>;
 
    protected:
-    Logger() { log_file_handle = std::fopen("runtime.log", "w"); };
+    Logger() { log_file_handle = std::fopen("logs/runtime.log", "w"); };
 
     ~Logger() { std::fclose(log_file_handle); };
     Logger(const Logger&) = delete;

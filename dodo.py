@@ -52,3 +52,13 @@ def task_shutdown_psql():
     return {
         'actions': [docker_cmds.shutdown_postgres_container],
     }
+
+def task_setup_testbench():
+    return {
+        'actions' :[docker_cmds.setup_testbench_containers],
+    }
+
+def task_destroy_testbench():
+    return {
+        'actions' :[docker_cmds.destroy_testbench_containers],
+    }

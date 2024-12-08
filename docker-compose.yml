@@ -8,6 +8,10 @@ services:
         ipv4_address: 10.5.0.5
       backend:
         ipv4_address: 11.0.0.4
+    volumes:
+      - type: bind
+        source: ${PROJECT_ROOT_DIR}/out/server
+        target: /test_bench/logs
   client1:
     build:
       context: .
@@ -17,6 +21,10 @@ services:
     networks:
       usernet:
         ipv4_address: 10.5.0.6
+    volumes:
+      - type: bind
+        source: ${PROJECT_ROOT_DIR}/out/client1
+        target: /test_bench/logs
   client2:
     build:
       context: .
@@ -26,6 +34,10 @@ services:
     networks:
       usernet:
         ipv4_address: 10.5.0.7
+    volumes:
+      - type: bind
+        source: ${PROJECT_ROOT_DIR}/out/client2
+        target: /test_bench/logs
 
 networks:
   usernet:

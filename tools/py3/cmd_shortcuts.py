@@ -19,6 +19,8 @@ def docker_run_args_list(mounts_list: list[str]) -> list[str]:
 
 def run_dev_image_cmd() -> str:
     args_list = docker_run_args_list(LIST_OF_MOUNTS_FOR_DEV)
+    project_root = os.path.abspath(os.curdir)
+    args_list = args_list + ['--env',f'PROJECT_ROOT_DIR={project_root}']
     cmd_words = DOCKER_RUN_CMD + args_list + DEV_IMAGE_NAME
     return ' '.join(cmd_words)
 
@@ -51,17 +53,24 @@ def run_postgres_container() -> None:
 def shutdown_postgres_container() -> None:
     os.system(f'docker stop {POSTGRES_CONTAINER_NANE}')
     os.system(f'docker rm {POSTGRES_CONTAINER_NANE}')
-    
+
+def setup_testbench_containers() -> None:
+    os.makedirs(f'{ARTIFACTS_DIR}/server', exist_ok = True)
+    os.makedirs(f'{ARTIFACTS_DIR}/client1', exist_ok = True)
+    os.makedirs(f'{ARTIFACTS_DIR}/client2', exist_ok = True)
+    os.system('PROJECT_ROOT_DIR=${PROJECT_ROOT_DIR} docker compose up -d --build')
+
+def destroy_testbench_containers() -> None:
+    os.system('docker compose down')
+    os.system('docker image rm $(docker images messenger* -q)')
+
 
 # Project build
-
-BUILD_DIR = './build'
-CMAKE_TOOLCHAIN_FILE = 'CMakeToolchain.cmake'
-CLANG_CHECK = 1
-BUILD_THREAD_NUM = 4
-
 def clear_project() -> None:
-    os.system(f'rm -rf {BUILD_DIR}')
+    if os.path.exists(f'{BUILD_DIR}'):
+        os.system(f'rm -rf {BUILD_DIR}')
+    if os.path.exists(f'{ARTIFACTS_DIR}'):
+        os.system(f'rm -rf {ARTIFACTS_DIR}')
 
 def build_project() -> None:
     if not os.path.exists(f'{BUILD_DIR}'):
