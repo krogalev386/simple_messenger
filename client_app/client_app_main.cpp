@@ -21,7 +21,7 @@ Envelope create_text_envelope(UserID sender_id, UserID recepient_id) {
                              .message_type = MessageType::UserMessage},
                       .type         = DataType::TextMessage,
                       .sender_id    = sender_id,
-                      .recipient_id = recepient_id,
+                      .recepient_id = recepient_id,
                       }
     };
     return env;
@@ -153,6 +153,10 @@ void client_interactive_main(size_t port_id, const char* ip_string,
 }
 
 int main(int argn, char* argv[]) {
+    // Verify that the version of the library that we linked against is
+    // compatible with the version of the headers we compiled against.
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     if (argn == 2) {
         client_interactive_main(DEFAUILT_TCP_PORT, "127.0.0.1",
                                 std::atoi(argv[1]));
@@ -161,4 +165,7 @@ int main(int argn, char* argv[]) {
     } else {
         printf("Too many args; the client has not started\n");
     }
+
+    // Optional:  Delete all global objects allocated by libprotobuf.
+    google::protobuf::ShutdownProtobufLibrary();
 }

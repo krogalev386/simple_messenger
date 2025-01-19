@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package protobuf_itf;
+
+enum DataType {
+    TextMessage = 0;
+    FileMessage = 1;
+}
+
+enum MessageType {
+    UserMessage = 0;
+    ServiceMessage = 1;
+    AckMessage = 2;
+}
+
+message Header {
+    optional uint64 payload_size = 1;
+    optional uint64 total_size = 2;
+    optional MessageType message_type = 3;
+    optional uint32 timestamp = 4;
+}
+
+message EnvelopeMeta {
+    optional Header header = 1;
+    optional DataType type = 2;
+    optional uint64 sender_id = 3;
+    optional uint64 recepient_id = 4;
+}
+
+message Envelope {
+    required EnvelopeMeta meta_data = 1;
+    required bytes payload = 2;
+}
+
+message UserCredentials {
+    optional bytes email = 1;
+    optional bytes password = 2;
+}

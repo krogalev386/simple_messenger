@@ -1,8 +1,26 @@
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_C_COMPILER "/usr/bin/clang")
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-
 set(CMAKE_CXX_FLAGS "-std=c++17")
 
-include_directories("/usr/lib/llvm-14/include")
-link_directories("usr/lib/llvm-14/lib")
+if (DEFINED ENV{C_COMPILER})
+    set(CMAKE_C_COMPILER $ENV{C_COMPILER})
+else()
+    message(ERROR "C_COMPILER env path is not defined!")
+endif()
+
+if (DEFINED ENV{CXX_COMPILER})
+    set(CMAKE_CXX_COMPILER $ENV{CXX_COMPILER})
+else()
+    message(ERROR "CXX_COMPILER env path is not defined!")
+endif()
+
+if (DEFINED ENV{LLVM_INCLUDE_PATH})
+    include_directories($ENV{LLVM_INCLUDE_PATH})
+else()
+    message(ERROR "LLVM_INCLUDE_PATH env var is not defined!")
+endif()
+
+if (DEFINED ENV{LLVM_LIB_PATH})
+    link_directories($ENV{LLVM_LIB_PATH})
+else()
+    message(ERROR "LLVM_LIB_PATH env var is not defined!")
+endif()

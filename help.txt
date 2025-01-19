@@ -21,9 +21,13 @@ doit run_dev_env
 
 # run and rebuild docker-compose
 docker compose up -d --build
+or
+doit setup_testbench
 
 # shut down docker-compose containers
 docker compose down
+or
+doit destroy_testbench
 
 # compile with clang-tidy check
 rm -rf *; cmake -DCLANG_TIDY_CHECK=1 -DCMAKE_TOOLCHAIN_FILE=../CMakeToolchain.cmake ..; cmake --build . -j 4
@@ -50,3 +54,6 @@ doit shutdown_psql
 
 # remove docker compose images
 docker image rm $(docker images -f "reference=messenger*" -q)
+
+# remove unnamed docker images
+docker image rm $(docker images --filter dangling=true -q)

@@ -27,7 +27,7 @@ struct EnvelopeMeta {
     Header   header;
     DataType type;
     UserID   sender_id;
-    UserID   recipient_id;
+    UserID   recepient_id;
 };
 
 struct PhoneBookRecord {

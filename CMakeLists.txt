@@ -12,6 +12,7 @@ if(CLANG_TIDY_CHECK)
     )
 endif()
 
+find_package(Protobuf REQUIRED)
 add_subdirectory(common)
 add_subdirectory(client_app)
 add_subdirectory(server_app)

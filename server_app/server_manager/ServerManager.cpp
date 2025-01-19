@@ -29,12 +29,19 @@ ServerManager::ServerManager()
     }
     ///////////////////////////////////////////
 
+    // Verify that the version of the library that we linked against is
+    // compatible with the version of the headers we compiled against.
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     ThreadManager::init();
 };
 
 ServerManager::~ServerManager() {
     AuthentificationService::destroy();
     ThreadManager::destroy();
+
+    // Delete all global objects allocated by libprotobuf.
+    google::protobuf::ShutdownProtobufLibrary();
 }
 ServerTcpEndpoint& ServerManager::getTcpEndPoint() { return endpoint; };
 

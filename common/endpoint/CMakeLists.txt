@@ -12,6 +12,7 @@ target_include_directories(common_endpoints_lib
 target_link_libraries(common_endpoints_lib
     PUBLIC
         msg_itf_lib_if
+        protobuf_itf_lib
         logger_lib_if
         message_processor_lib_if
         thread_manager_lib

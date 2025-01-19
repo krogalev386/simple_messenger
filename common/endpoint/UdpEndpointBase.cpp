@@ -45,9 +45,15 @@ AddressedEnvelope UdpEndpointBase::recvDataGram() {
     memset(&sender_info.addr, 0, sizeof(sockaddr));
 
     // sender_info should be filled by sender address after the reception
-    int64_t n_bytes = recvfrom(socket_id, &env, sizeof(Envelope), 0,
-                               &(sender_info.addr), &(sender_info.addrlen));
+    int64_t n_bytes =
+        recvfrom(socket_id, &(this->buffer_in), sizeof(this->buffer_in), 0,
+                 &(sender_info.addr), &(sender_info.addrlen));
+    std::optional<Envelope> res = getEnvFromProtoBuffer(Direction::IN);
+    if (res) {
+        env = res.value();
+    }
     LOG("%ld bytes received from and enqueued", n_bytes);
+
     AddressedEnvelope aEnv{sender_info, env};
     return aEnv;
 }
@@ -70,9 +76,10 @@ void UdpEndpointBase::storeTstampToAckQueue(const Timestamp& tStamp) {
 }
 
 void UdpEndpointBase::sendDataGram(const AddressedEnvelope& aEnv) {
-    int64_t n_bytes = sendto(socket_id, &aEnv.env, sizeof(Envelope), 0,
-                             const_cast<sockaddr*>(&aEnv.sock_info.addr),
-                             aEnv.sock_info.addrlen);
+    putEnvToProtoBuffer(aEnv.env, Direction::OUT);
+    int64_t n_bytes = sendto(
+        socket_id, &this->buffer_out, sizeof(this->buffer_out), 0,
+        const_cast<sockaddr*>(&aEnv.sock_info.addr), aEnv.sock_info.addrlen);
     LOG("%ld bytes has been sent over UDP", n_bytes);
     if (n_bytes < 0) {
         perror("send failure");

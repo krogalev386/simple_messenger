@@ -16,6 +16,9 @@ RUN apt install -y clang && \
     apt install -y clang-format && \
     apt install -y g++
 
+# Install protobuf
+RUN apt install -y protobuf-compiler
+
 # Install git
 RUN apt install -y git
 
@@ -32,6 +35,12 @@ RUN apt install -y nano
 
 # Set work directory
 WORKDIR /workdir/messenger
+
+# Setup image specific paths to LLVM files
+ENV C_COMPILER /usr/bin/clang
+ENV CXX_COMPILER /usr/bin/clang++
+ENV LLVM_INCLUDE_PATH /usr/lib/llvm-14/include
+ENV LLVM_LIB_PATH /usr/lib/llvm-14/lib
 
 # Allow git to do manipulations inside the container
 RUN git config --global --add safe.directory /workdir/messenger

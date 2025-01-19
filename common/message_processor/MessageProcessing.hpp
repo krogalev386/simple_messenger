@@ -45,7 +45,15 @@ inline UserID getSenderID(const Envelope& env) {
     return env.meta_data.sender_id;
 };
 
+inline void setSenderId(Envelope& env, UserID id) {
+    env.meta_data.sender_id = id;
+};
+
 inline UserID getRecepientID(const Envelope& env) {
-    return env.meta_data.recipient_id;
+    return env.meta_data.recepient_id;
+};
+
+inline void setRecepientId(Envelope& env, UserID id) {
+    env.meta_data.recepient_id = id;
 };
 };  // namespace msg_proc
