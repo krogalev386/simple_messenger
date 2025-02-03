@@ -25,9 +25,8 @@ class EndpointBase {
     static std::tuple<bool, bool> pollSocket(int socket_id);
 
    protected:
-    enum Direction { IN, OUT };
-    void putEnvToProtoBuffer(const Envelope& raw_env, const Direction dir);
-    std::optional<Envelope> getEnvFromProtoBuffer(const Direction dir);
+    void putEnvToProtoBufferOut(const Envelope& raw_env);
+    std::optional<Envelope> getEnvFromProtoBufferIn();
 
    protected:
     struct RxTxBuffer {

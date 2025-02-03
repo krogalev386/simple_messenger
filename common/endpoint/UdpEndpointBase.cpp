@@ -48,7 +48,7 @@ AddressedEnvelope UdpEndpointBase::recvDataGram() {
     int64_t n_bytes =
         recvfrom(socket_id, &(this->buffer_in), sizeof(this->buffer_in), 0,
                  &(sender_info.addr), &(sender_info.addrlen));
-    std::optional<Envelope> res = getEnvFromProtoBuffer(Direction::IN);
+    std::optional<Envelope> res = getEnvFromProtoBufferIn();
     if (res) {
         env = res.value();
     }
@@ -76,7 +76,7 @@ void UdpEndpointBase::storeTstampToAckQueue(const Timestamp& tStamp) {
 }
 
 void UdpEndpointBase::sendDataGram(const AddressedEnvelope& aEnv) {
-    putEnvToProtoBuffer(aEnv.env, Direction::OUT);
+    putEnvToProtoBufferOut(aEnv.env);
     int64_t n_bytes = sendto(
         socket_id, &this->buffer_out, sizeof(this->buffer_out), 0,
         const_cast<sockaddr*>(&aEnv.sock_info.addr), aEnv.sock_info.addrlen);

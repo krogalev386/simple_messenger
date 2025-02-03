@@ -67,20 +67,10 @@ std::tuple<bool, bool> EndpointBase::pollSocket(int socket_id) {
     return {ready_to_hanlde, err_or_closed};
 };
 
-void EndpointBase::putEnvToProtoBuffer(const Envelope& raw_env,
-                                       const Direction dir) {
-    protobuf_itf::Envelope* proto_env = nullptr;
-    RxTxBuffer*             buffer = nullptr;
-    if (dir == Direction::IN) {
-        proto_env = &proto_message_buffer_in;
-        buffer    = &buffer_in;
-    } else if (dir == Direction::OUT) {
-        proto_env = &proto_message_buffer_out;
-        buffer    = &buffer_out;
-    } else {
-        LOG("ERROR: direction of message is not determined");
-        return;
-    }
+void EndpointBase::putEnvToProtoBufferOut(const Envelope& raw_env) {
+
+    protobuf_itf::Envelope* proto_env = &proto_message_buffer_out;
+    RxTxBuffer*             buffer    = &buffer_out;
 
     protobuf_itf::EnvelopeMeta* proto_meta_data =
         proto_env->mutable_meta_data();
@@ -121,24 +111,13 @@ void EndpointBase::putEnvToProtoBuffer(const Envelope& raw_env,
         return;
     }
     buffer->message_size = proto_env->ByteSizeLong();
-    // memcpy(buffer->payload, proto_env, proto_env->ByteSizeLong());
     proto_env->SerializeToArray(buffer->payload, buffer->message_size);
 };
 
-std::optional<Envelope> EndpointBase::getEnvFromProtoBuffer(
-    const Direction dir) {
-    protobuf_itf::Envelope* proto_env = nullptr;
-    RxTxBuffer*             buffer = nullptr;
-    if (dir == Direction::IN) {
-        proto_env = &proto_message_buffer_in;
-        buffer    = &buffer_in;
-    } else if (dir == Direction::OUT) {
-        proto_env = &proto_message_buffer_out;
-        buffer    = &buffer_out;
-    } else {
-        LOG("ERROR: direction of message is not determined");
-        return std::nullopt;
-    }
+std::optional<Envelope> EndpointBase::getEnvFromProtoBufferIn() {
+
+    protobuf_itf::Envelope* proto_env = &proto_message_buffer_in;
+    RxTxBuffer*             buffer    = &buffer_in;
 
     proto_env->ParseFromArray(buffer->payload, buffer->message_size);
 
