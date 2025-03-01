@@ -4,30 +4,19 @@ target_include_directories(msg_itf_lib_if
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-protobuf_generate_cpp(
-    PROTO_SRCS
-    PROTO_HDRS
-    proto_defines.proto
-)
+add_library(protobuf_itf_lib)
 
-add_library(protobuf_itf_lib
-    ${PROTO_SRCS}
+protobuf_generate(
+    LANGUAGE cpp
+    TARGET protobuf_itf_lib
+    PROTOS proto_defines.proto
 )
 
 target_link_libraries(protobuf_itf_lib
     PUBLIC
-        ${Protobuf_LIBRARIES}
+        protobuf::libprotobuf
+        protobuf::libprotoc
 )
-
-message(STATUS ${Protobuf_VERSION})
-
-if (Protobuf_VERSION VERSION_GREATER_EQUAL 4)
-    find_package(absl REQUIRED)
-    target_link_libraries(protobuf_itf_lib
-        PUBLIC
-            absl::log_internal_check_op
-    )
-endif()
 
 target_include_directories(protobuf_itf_lib
     PUBLIC

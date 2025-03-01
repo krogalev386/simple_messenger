@@ -6,7 +6,8 @@ FROM ubuntu:jammy
 RUN apt update && \
     apt install -y docker && \
     apt install -y docker.io && \
-    apt install -y docker-compose-v2
+    apt install -y docker-compose-v2 && \
+    apt install -y docker-buildx
 
 # Install C++ utilities
 RUN apt install -y clang && \
@@ -15,9 +16,6 @@ RUN apt install -y clang && \
     apt install -y clang-tidy && \
     apt install -y clang-format && \
     apt install -y g++
-
-# Install protobuf
-RUN apt install -y protobuf-compiler
 
 # Install git
 RUN apt install -y git
@@ -32,6 +30,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 # Install basic text editor
 RUN apt install -y nano
+
+# Install grpc and protobuf from source
+WORKDIR /workdir
+COPY ./tools/grpc_setup/install_grpc.sh .
+RUN ./install_grpc.sh && rm install_grpc.sh
 
 # Set work directory
 WORKDIR /workdir/messenger
