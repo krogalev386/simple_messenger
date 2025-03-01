@@ -26,6 +26,7 @@ HOST_SSH_AUTH_SOCK = '$SSH_AUTH_SOCK'
 DOCKER_SSH_AUTH_SOCK = '/ssh-agent'
 DOCKER_RUN_CMD = ['docker', 'run']
 DEV_IMAGE_NAME = ['dev_image']
+APP_BUILD_BASE_IMAGE_NAME = ['build-base-image']
 DEFAULT_RUN_ARGS = ['--rm', '-it',
                     '--security-opt seccomp=unconfined',
                     '--env',f'SSH_AUTH_SOCK={DOCKER_SSH_AUTH_SOCK}']

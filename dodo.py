@@ -62,3 +62,18 @@ def task_destroy_testbench():
     return {
         'actions' :[docker_cmds.destroy_testbench_containers],
     }
+
+def task_build_app_base_image():
+    return {
+        'actions' :[docker_cmds.build_app_base_image],
+    }
+
+def task_remove_app_base_image():
+    return {
+        'actions' :[docker_cmds.remove_app_base_image],
+    }
+
+def task_update_app_base_image():
+    return {
+        'actions' :[docker_cmds.update_app_base_image],
+    }

@@ -4,6 +4,7 @@
 2. Docker
 3. ssh-agent
 
+## COMMANDS
 # build dev docker image
 docker build -t dev_image .
 or
@@ -57,3 +58,18 @@ docker image rm $(docker images -f "reference=messenger*" -q)
 
 # remove unnamed docker images
 docker image rm $(docker images --filter dangling=true -q)
+
+
+### Git magic
+
+# init submodules (gRPC 1.66.x as an example):
+git submodule add --depth 1 https://github.com/grpc/grpc ext/gprc
+git submodule foreach git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+cd ext/grpc
+git fetch --depth=1 origin v1.66.x
+git checkout v1.66.x
+cd ../../
+git add ext/grpc
+
+# prepare submodules
+git submodule update --depth 1 --init --recursive --checkout

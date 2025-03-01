@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.22)
 
 project(net_app)
 
@@ -12,7 +12,7 @@ if(CLANG_TIDY_CHECK)
     )
 endif()
 
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
 add_subdirectory(common)
 add_subdirectory(client_app)
 add_subdirectory(server_app)

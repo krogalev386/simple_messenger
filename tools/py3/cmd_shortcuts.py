@@ -65,6 +65,19 @@ def destroy_testbench_containers() -> None:
     os.system('docker image rm $(docker images messenger* -q)')
 
 
+# Handle the base image for application assembly
+def build_app_base_image() -> None:
+    os.system(f'docker buildx build -t {APP_BUILD_BASE_IMAGE_NAME}:latest \
+                                    -f ./tools/docker/app_build_base/Dockerfile .')
+
+def remove_app_base_image() -> None:
+    os.system(f'docker image rm {APP_BUILD_BASE_IMAGE_NAME}')
+
+def update_app_base_image() -> None:
+    remove_app_base_image()
+    build_app_base_image()
+
+
 # Project build
 def clear_project() -> None:
     if os.path.exists(f'{BUILD_DIR}'):
