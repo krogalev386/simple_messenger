@@ -1,64 +1,64 @@
 import os
+import docker
 
 from constants import *
 
-LIST_OF_MOUNTS_FOR_DEV = [
-    f'{PROJECT_ROOT_DIR_HOST}:{PROJECT_ROOT_DIR_CONT}',
-    f'{DOCKER_SOCK}:{DOCKER_SOCK}',
-    f'{USER_HOST_GIT_CONFIG}:{DOCKER_GIT_CONFIG}',
-    f'{HOST_SSH_AUTH_SOCK}:{DOCKER_SSH_AUTH_SOCK}',
-]
 
+class DockerCliMngr:
+    def __enter__(self):
+        self.client = docker.from_env()
+        return self.client
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.client.close()
 
-# Docker management
-def docker_run_args_list(mounts_list: list[str]) -> list[str]:
-    args_list = RUN_ARGS
-    for mounts in mounts_list:
-        args_list += ['-v', mounts]
-    return args_list
-
-def run_dev_image_cmd() -> str:
-    args_list = docker_run_args_list(LIST_OF_MOUNTS_FOR_DEV)
-    project_root = os.path.abspath(os.curdir)
-    args_list = args_list + ['--env',f'PROJECT_ROOT_DIR={project_root}']
-    cmd_words = DOCKER_RUN_CMD + args_list + DEV_IMAGE_NAME
-    return ' '.join(cmd_words)
-
-def build_dev_image_cmd(fast: bool) -> str:
-    cache_flag = [] if fast is True else ['--no-cache']
-    return ' '.join(['docker', 'build'] + cache_flag + ['-t'] + DEV_IMAGE_NAME + ['--ssh','default','.'])
-
-def rm_dev_image_cmd() -> str:
-    return ' '.join(['docker', 'image', 'rm'] + DEV_IMAGE_NAME)
-
-def run_dev_image() -> None:
-    cmd = run_dev_image_cmd()
-    os.system(f'{cmd}')
-
-def build_dev_image(fast: bool) -> None:
-    cmd = build_dev_image_cmd(fast)
-    os.system(f'{cmd}')
-
-def rm_dev_image() -> None:
-    cmd = rm_dev_image_cmd()
-    os.system(f'{cmd}')
 
 def run_postgres_container() -> None:
-    os.system(f'docker run -d --name {POSTGRES_CONTAINER_NANE} \
-                              --network {BACKEND_NETWORK_NAME} \
-                              --ip {POSTGRES_IPADDR} \
-                              -e POSTGRES_PASSWORD={POSTGRES_ADMIN_PASS} \
-                              {POSTGRES_IMAGE_VERSION}')
+    with DockerCliMngr() as client:
+        container = client.containers.run(
+            POSTGRES_IMAGE_VERSION,
+            detach=True,
+            name=POSTGRES_CONTAINER_NANE,
+            environment={
+                'POSTGRES_PASSWORD': POSTGRES_ADMIN_PASS
+            },
+        )
+        network = client.networks.get(BACKEND_NETWORK_NAME)
+        network.connect(container, ipv4_address=POSTGRES_IPADDR)
+
 
 def shutdown_postgres_container() -> None:
-    os.system(f'docker stop {POSTGRES_CONTAINER_NANE}')
-    os.system(f'docker rm {POSTGRES_CONTAINER_NANE}')
+    with DockerCliMngr() as client:
+        containers = client.containers.list(all=True, filters={'name': POSTGRES_CONTAINER_NANE})
+        if containers != []:
+            container = containers[0]
+            container.stop()
+            container.remove()
+        else:
+            print("No psql container is running")
+
 
 def setup_testbench_containers() -> None:
+    with DockerCliMngr() as client:
+        print("Check if base image exists...")
+        base_image = None
+        if client.images.list(filters={"reference": APP_BUILD_BASE_IMAGE_NAME}) != []:
+            base_image = client.images.get(APP_BUILD_BASE_IMAGE_NAME)
+            print("base build image found")
+        else:
+            print("base image is not found, build image...")
+            build_app_base_image()
+        print("Base image exists.")
+        print("Check if postgres container is init and up...")
+        containers = client.containers.list(all=True, filters={'name': POSTGRES_CONTAINER_NANE})
+        if containers == []:
+            print("Postgres contaier does not exist. Booting it now...")
+            run_postgres_container()
+
     os.makedirs(f'{ARTIFACTS_DIR}/server', exist_ok = True)
     os.makedirs(f'{ARTIFACTS_DIR}/client1', exist_ok = True)
     os.makedirs(f'{ARTIFACTS_DIR}/client2', exist_ok = True)
     os.system('PROJECT_ROOT_DIR=${PROJECT_ROOT_DIR} docker compose up -d --build')
+
 
 def destroy_testbench_containers() -> None:
     os.system('docker compose down')
@@ -67,11 +67,30 @@ def destroy_testbench_containers() -> None:
 
 # Handle the base image for application assembly
 def build_app_base_image() -> None:
-    os.system(f'docker buildx build -t {APP_BUILD_BASE_IMAGE_NAME}:latest \
-                                    -f ./tools/docker/app_build_base/Dockerfile .')
+    with DockerCliMngr() as client:
+        print("Building base application image...")
+
+        build_logs = client.api.build(path='.',
+                                      dockerfile='./tools/docker/app_build_base/Dockerfile',
+                                      tag=f'{APP_BUILD_BASE_IMAGE_NAME}:latest',
+                                      decode=True,
+                                      rm=True)
+
+        for event in build_logs:
+            if 'stream' in event:
+                if "Step" in event['stream'].strip():
+                    print(event['stream'].strip())
+                else:
+                    print(event['stream'].strip(), end="\r")
+
 
 def remove_app_base_image() -> None:
-    os.system(f'docker image rm {APP_BUILD_BASE_IMAGE_NAME}')
+    with DockerCliMngr() as client:
+        if client.images.list(filters={"reference": APP_BUILD_BASE_IMAGE_NAME}) == []:
+            print("base image does not exists")
+            return
+        client.images.remove(APP_BUILD_BASE_IMAGE_NAME)
+
 
 def update_app_base_image() -> None:
     remove_app_base_image()

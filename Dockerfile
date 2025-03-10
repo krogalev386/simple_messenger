@@ -21,7 +21,9 @@ RUN apt install -y clang && \
 RUN apt install -y git
 
 # Install Python tools and utilities
-RUN apt install -y python3-doit
+RUN apt install -y python3-doit && \
+    apt install -y pip && \
+    pip install docker
 
 # Install data base server
 RUN export DEBIAN_FRONTEND=noninteractive && \
