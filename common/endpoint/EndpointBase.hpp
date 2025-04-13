@@ -25,7 +25,7 @@ class EndpointBase {
     static std::tuple<bool, bool> pollSocket(int socket_id);
 
    protected:
-    void putEnvToProtoBufferOut(const Envelope& raw_env);
+    void                    putEnvToProtoBufferOut(const Envelope& raw_env);
     std::optional<Envelope> getEnvFromProtoBufferIn();
 
    protected:

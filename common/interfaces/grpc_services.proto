@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "proto_defines.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package grpc_service;
+
+message UserID {
+    uint64 id = 1;
+}
+
+service GrpcEndpoint {
+    rpc acceptConnection(protobuf_itf.UserCredentials) returns (UserID) {}
+    rpc receiveMessage (protobuf_itf.Envelope) returns (google.protobuf.Empty) {}
+    rpc streamIncomingMessages (google.protobuf.Empty) returns (stream protobuf_itf.Envelope) {}
+}

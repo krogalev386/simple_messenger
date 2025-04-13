@@ -1,4 +1,7 @@
-add_library(client_endpoints_lib ClientTcpEndpoint.cpp)
+add_library(client_endpoints_lib
+    ClientTcpEndpoint.cpp
+    GrpcClient.cpp
+)
 target_include_directories(client_endpoints_lib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}

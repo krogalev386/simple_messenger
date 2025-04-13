@@ -4,23 +4,32 @@ target_include_directories(msg_itf_lib_if
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(protobuf_itf_lib)
+add_library(protobuf_itf_lib
+    grpc_services.proto
+    proto_defines.proto
+)
 
 protobuf_generate(
     LANGUAGE cpp
     TARGET protobuf_itf_lib
-    PROTOS proto_defines.proto
+)
+
+protobuf_generate(
+    LANGUAGE grpc
+    GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
+    TARGET protobuf_itf_lib
+    PLUGIN "protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin"
 )
 
 target_link_libraries(protobuf_itf_lib
     PUBLIC
         protobuf::libprotobuf
-        protobuf::libprotoc
+        gRPC::grpc
+        gRPC::grpc++
 )
 
 target_include_directories(protobuf_itf_lib
     PUBLIC
-        ${Protobuf_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 

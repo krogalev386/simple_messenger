@@ -1,4 +1,5 @@
 add_library(server_endpoints_lib
+    GrpcServer.cpp
     ServerTcpEndpoint.cpp
     ServerUdpEndpoint.cpp
 )

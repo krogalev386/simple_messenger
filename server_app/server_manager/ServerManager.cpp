@@ -1,11 +1,17 @@
 #include "ServerManager.hpp"
 
+#include <grpcpp/security/server_credentials.h>
+#include <grpcpp/server_builder.h>
+
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
 
 #include "AuthentificationService.hpp"
+#include "GrpcServer.hpp"
 #include "Logger.hpp"
 #include "MessageProcessing.hpp"
 #include "PsqlManager.hpp"
@@ -89,11 +95,13 @@ void ServerManager::checkMail() {
 };
 
 void ServerManager::runEventLoop() {
-    auto& endpoint = getTcpEndPoint();
-    endpoint.listenConnections();
-
-    while (true) {
-        endpoint.tryAcceptConnection();
-        checkMail();
-    }
+    std::string addr =
+        std::string("0.0.0.0:") + std::to_string(DEFAUILT_GRPC_PORT);
+    GrpcEndpointServer  grpc_endpoint;
+    grpc::ServerBuilder builder;
+    builder.AddListeningPort(addr, grpc::InsecureServerCredentials());
+    builder.RegisterService(&grpc_endpoint);
+    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    LOG("gRPC endpoint is up...");
+    server->Wait();
 };

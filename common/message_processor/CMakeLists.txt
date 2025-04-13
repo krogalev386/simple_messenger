@@ -6,4 +6,5 @@ target_include_directories(message_processor_lib_if
 target_link_libraries(message_processor_lib_if
     INTERFACE
         msg_itf_lib_if
+        protobuf_itf_lib
 )

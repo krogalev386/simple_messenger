@@ -15,7 +15,7 @@ class AuthentificationService
     AuthentificationService();
     ~AuthentificationService() = default;
 
-   private:
+   public:
     static std::optional<UserID> checkIfRegistered(const UserCredentials&);
 
    public:

@@ -21,8 +21,15 @@ class CircularBuffer {
     ~CircularBuffer() = default;
 
     CircularBuffer(const CircularBuffer&)           = delete;
-    CircularBuffer(CircularBuffer&&)                = delete;
+    // CircularBuffer(CircularBuffer&&)                = delete;
     CircularBuffer& operator=(const CircularBuffer) = delete;
+
+    CircularBuffer(CircularBuffer&& other) {
+        std::unique_lock<std::mutex> lock(rw_mtx);
+        if (this != &other) {
+            circ_buffer = std::move(other.circ_buffer);
+        }
+    };
 
     bool is_empty() {
         std::unique_lock<std::mutex> lock(ronly_mtx);

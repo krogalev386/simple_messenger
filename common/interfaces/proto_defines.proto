@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package protobuf_itf;
 
@@ -14,25 +14,25 @@ enum MessageType {
 }
 
 message Header {
-    optional uint64 payload_size = 1;
-    optional uint64 total_size = 2;
-    optional MessageType message_type = 3;
-    optional uint32 timestamp = 4;
+    uint64 payload_size = 1;
+    uint64 total_size = 2;
+    MessageType message_type = 3;
+    uint32 timestamp = 4;
 }
 
 message EnvelopeMeta {
-    optional Header header = 1;
-    optional DataType type = 2;
-    optional uint64 sender_id = 3;
-    optional uint64 recepient_id = 4;
+    Header header = 1;
+    DataType type = 2;
+    uint64 sender_id = 3;
+    uint64 recepient_id = 4;
 }
 
 message Envelope {
-    required EnvelopeMeta meta_data = 1;
-    required bytes payload = 2;
+    EnvelopeMeta meta_data = 1;
+    bytes payload = 2;
 }
 
 message UserCredentials {
-    optional bytes email = 1;
-    optional bytes password = 2;
+    string email = 1;
+    string password = 2;
 }

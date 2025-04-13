@@ -10,7 +10,6 @@
 #include "defines.hpp"
 
 AuthentificationService::AuthentificationService() = default;
-;
 
 std::optional<UserID> AuthentificationService::checkIfRegistered(
     const UserCredentials& considered_cred) {
