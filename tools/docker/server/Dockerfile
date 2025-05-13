@@ -7,7 +7,7 @@ RUN rm -rf build/ && mkdir build && \
     cmake -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.cmake -B build . && \
     cmake --build build --target server_app -j 4
 
-FROM alpine:latest
+FROM alpine:3.21.3
 RUN apk update && \
     apk add --no-cache libstdc++ && \
     apk add gdb && \
