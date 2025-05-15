@@ -1,5 +1,5 @@
 # simple-messenger
-Brand new super-puper-duper instant messages application
+Brand new super-puper-duper instant messaging application
 
 ## What is it?
 ~Just a hobby project/a test site for playing with random stuff that I am trying to learn~
@@ -13,7 +13,7 @@ If you are looking for:
 * reliable
 * and blazing fast
 
-enviroment for communication - you can find it anywhere but there. At least today.
+enviroment for communication - you can find it anywhere but here. At least today.
 Don't worry, we will notify you when you can come back here for all this ~(No, we won't)~.
 
 Currently the project consists of the more-or-less functioning C++ server application side
@@ -58,9 +58,6 @@ _will be speeded up by local Docker image caching mechanism._
 
 To run and enter inside the dev container, type
 ```
-# temporarly workaround for the first container run; will be fixed soon
-docker network create -d bridge messenger_backend --gateway 11.0.0.1 --subnet 11.0.0.0/24
-
 python3 tools/py3/dev_env.py
 ```
 
@@ -93,3 +90,13 @@ docker attach messenger-client1-1
 docker attach messenger-client2-1
 docker attach messenger-client3-1
 ```
+
+If you still want to play with it, inside these containers you can run the client application
+```
+./client_app/client_app 10.5.0.5 <user_id>
+```
+where ```10.5.0.5``` is the IP address of the server container and ```<user_id>``` is the desired
+user ID hardcoded to be within range ```[0,2]```.
+
+The app will show you the prompt with question about to which user with which ```<user_id>``` you are
+going to sent messages.

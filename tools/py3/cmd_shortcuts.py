@@ -103,10 +103,14 @@ def clear_project() -> None:
         os.system(f'rm -rf {BUILD_DIR}')
     if os.path.exists(f'{ARTIFACTS_DIR}'):
         os.system(f'rm -rf {ARTIFACTS_DIR}')
+    if os.path.exists('logs'):
+        os.system('rm -rf logs')
 
 def build_project() -> None:
     if not os.path.exists(f'{BUILD_DIR}'):
         os.mkdir(f'{BUILD_DIR}')
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
     os.chdir(f'{BUILD_DIR}')
     os.system(f'cmake -DCLANG_TIDY_CHECK={CLANG_CHECK} \
                       -DCMAKE_TOOLCHAIN_FILE=../{CMAKE_TOOLCHAIN_FILE} ..; \

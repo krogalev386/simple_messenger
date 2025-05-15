@@ -34,6 +34,15 @@ def rm_dev_image_cmd() -> str:
     return ' '.join(['docker', 'image', 'rm'] + DEV_IMAGE_NAME)
 
 def run_dev_image() -> None:
+    # Create virtual backend network if it is not created yet
+    #
+    # The network is used for access to the database, so
+    # it is required to be created before running the dev container
+    # if you wish to run the server application right in the dev container
+    os.system(f"docker network create -d bridge {BACKEND_NETWORK_NAME} \
+                                      --gateway 11.0.0.1 \
+                                      --subnet 11.0.0.0/24 \
+                                      > /dev/null 2>&1")
     cmd = run_dev_image_cmd()
     os.system(f'{cmd}')
 
