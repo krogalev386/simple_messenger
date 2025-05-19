@@ -68,6 +68,8 @@ doit build_project
 
 To remove or re-build apps, use ```clear_project``` and ```rebuild_project``` doit targets respectively.
 
+To run unit tests, use ```check_project```.
+
 For managing of PostgreSQL database, there are the following doit targets:
 ```
 doit setup_psql - start PostgreSQL container

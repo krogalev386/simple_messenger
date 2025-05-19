@@ -6,6 +6,8 @@
 #include "defines.hpp"
 #include "proto_defines.pb.h"
 
+#include "Logger.hpp"
+
 namespace msg_proc {
 template <typename T>
 T get_payload(const Envelope& env) {

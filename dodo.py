@@ -36,6 +36,11 @@ def task_clear_project():
         'actions': [docker_app_cmds.clear_project],
     }
 
+def task_check_project():
+    return {
+        'actions': [docker_app_cmds.check_project],
+    }
+
 def task_rebuild_project():
     return {
         'actions': [

@@ -113,5 +113,16 @@ def build_project() -> None:
         os.mkdir('logs')
     os.chdir(f'{BUILD_DIR}')
     os.system(f'cmake -DCLANG_TIDY_CHECK={CLANG_CHECK} \
+                      -DBUILD_GOOGLE_TESTS=0 \
                       -DCMAKE_TOOLCHAIN_FILE=../{CMAKE_TOOLCHAIN_FILE} ..; \
                       cmake --build . -j {BUILD_THREAD_NUM}')
+
+def check_project() -> None:
+    if not os.path.exists(f'{BUILD_DIR}'):
+        os.mkdir(f'{BUILD_DIR}')
+    os.chdir(f'{BUILD_DIR}')
+    os.system(f'cmake -DBUILD_GOOGLE_TESTS=1 \
+                      -DCMAKE_TOOLCHAIN_FILE=../{CMAKE_TOOLCHAIN_FILE} ..; \
+                      cmake --build . --target ut_target \
+                      -j {BUILD_THREAD_NUM}')
+    os.system(f'ctest')
