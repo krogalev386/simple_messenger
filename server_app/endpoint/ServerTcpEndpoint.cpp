@@ -78,7 +78,7 @@ int ServerTcpEndpoint::acceptConnection() {
                                &new_client.socket_info.addrlen, SOCK_CLOEXEC);
 
     reinterpret_cast<sockaddr_in*>(&new_client.socket_info.addr)->sin_port =
-        htons(DEFAUILT_UDP_PORT);
+        htons(DEFAUILT_TCP_PORT);
 
     LOG("client socket id: %d", client_socket_id);
     if (client_socket_id < 0) {

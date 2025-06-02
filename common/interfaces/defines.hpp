@@ -7,9 +7,9 @@
 #include <cstdint>
 #include <vector>
 
-#define DEFAUILT_TCP_PORT 11111
-#define DEFAUILT_UDP_PORT 11112
-#define DEFAUILT_GRPC_PORT 11113
+#define DEFAUILT_TCP_PORT 51111
+#define DEFAUILT_UDP_PORT 51112
+#define DEFAUILT_GRPC_PORT 51113
 
 typedef uint64_t UserID;
 typedef uint32_t Timestamp;
